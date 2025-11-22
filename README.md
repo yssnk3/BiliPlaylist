@@ -4,7 +4,7 @@
 
 使用说明：
 
-1.在https://music.unmeta.cn 该网站用你的歌单链接获取txt文本
+1.可在https://music.unmeta.cn 该网站用你的歌单链接获取txt文本
 
 2.打开html文件，上传歌单后等待解析，获取复制脚本
 
