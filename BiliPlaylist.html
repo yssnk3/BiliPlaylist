@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BiliPlaylist Helper (Offline)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Babel Standalone for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      body { font-family: 'Noto Sans SC', sans-serif; background-color: #0f0f0f; color: #ffffff; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #1f1f1f; }
+      ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #fb7299; }
+      #loading-screen { position: fixed; inset: 0; background: #0f0f0f; display: flex; justify-content: center; align-items: center; z-index: 50; }
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    </style>
+
+    <!-- Global Polyfills -->
+    <script>
+      window.process = { env: {} };
+      window.onerror = function(msg, url, line, col, error) {
+        const log = document.getElementById('error-log');
+        if(log) {
+          log.style.display = 'block';
+          log.innerHTML += '<div>❌ ' + msg + '</div>';
+        }
+        console.error("Global Error:", msg, error);
+        document.getElementById('loading-text').innerText = "Error loading application. See console.";
+      };
+    </script>
+
+    <!-- Import Map (No Google GenAI) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0?dev",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client?dev",
+        "lucide-react": "https://esm.sh/lucide-react@0.294.0"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <!-- Loading State -->
+    <div id="loading-screen">
+       <div class="text-center">
+         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+         <p id="loading-text" class="text-gray-400">Initialize Offline Mode...</p>
+         <div id="error-log" class="hidden mt-4 text-left text-red-400 bg-red-900/20 p-4 rounded text-xs font-mono max-w-lg border border-red-800"></div>
+       </div>
+    </div>
+
+    <div id="root"></div>
+
+    <!-- Application Script -->
+    <script type="text/babel" data-type="module" data-presets="react">
+      import React, { useState, useCallback, useRef, useEffect } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import { Music, Github, AlertCircle, Upload, FileText, Check, Play, Copy, RefreshCw, X, AlertTriangle, Settings, ExternalLink, Terminal, Download } from 'lucide-react';
+      
+      console.log("Starting offline application...");
+
+      // --- INJECTED MODULES ---
+      
+// --- types.ts ---
+const ProcessingStatus = {
+  IDLE: 'IDLE',
+  PARSING: 'PARSING',
+  SUCCESS: 'SUCCESS',
+  ERROR: 'ERROR',
+};
+
+      
+// --- services/geminiService.ts (Offline Local Version) ---
+const parsePlaylistWithGemini = async (text) => {
+  // Simulate processing time for UX
+  await new Promise(resolve => setTimeout(resolve, 600));
+
+  if (!text) return [];
+
+  console.log("Using Offline Local Parser (Regex Mode)");
+  
+  const lines = text.split(/[\r\n]+/);
+  const songs = [];
+
+  for (const line of lines) {
+    let clean = line.trim();
+    if (!clean) continue;
+
+    // --- Basic Playlist Cleaning Rules ---
+    
+    // 1. Remove timecodes like [03:21], (03:21)
+    clean = clean.replace(/[\[\(]\d{2}:\d{2}(\.\d{2})?[\]\)]/g, '');
+
+    // 2. Remove leading numbering "1. ", "01.", "1 ", "[1]"
+    clean = clean.replace(/^[\[]?\d+[\]\)\.\s:：、]+/g, '');
+
+    // 3. Remove file extensions
+    clean = clean.replace(/\.(mp3|flac|wav|m4a|ogg|wma|aac)$/i, '');
+
+    // 4. Remove common noise words
+    clean = clean.replace(/(Official Video|Lyrics|MV|HQ|Remastered|Full Audio|\(.*?\))/gi, '');
+    
+    // 5. Remove trailing punctuation
+    clean = clean.replace(/[\-\s]+$/, '');
+
+    clean = clean.trim();
+    if (clean.length > 1) {
+      songs.push(clean);
+    }
+  }
+
+  return songs;
+};
+
+      
+// --- utils/scriptGenerator.ts ---
+const generateBilibiliScript = (songs, config) => {
+    const songListJson = JSON.stringify(songs.map(s => s.searchTerm));
+    return `
+// ============================================================================
+// 🤖 Bilibili 歌单助手 - 全自动收藏脚本 (v3.1 Stable)
+// ----------------------------------------------------------------------------
+// v3.1 更新:
+// 1. 🐛 修复收藏接口参数错误 (media_id -> add_media_ids)
+// 2. 🛡️ 增强 Video ID 提取逻辑 (兼容 id/aid 字段)
+// 3. 🍪 严格检查 CSRF Token
+// ============================================================================
+
+(async function() {
+    // --- 配置 ---
+    const songList = ${songListJson};
+    const interval = ${config.interval}; 
+
+    // --- UI 工具: 日志窗口 ---
+    const createLogger = () => {
+        const existing = document.getElementById('bili-helper-log');
+        if(existing) existing.remove();
+
+        const div = document.createElement('div');
+        div.id = 'bili-helper-log';
+        div.style = "position:fixed;bottom:20px;right:20px;width:380px;height:450px;background:rgba(10,10,10,0.95);color:#00ff00;z-index:99999;padding:15px;border-radius:8px;font-family:'Consolas', 'Monaco', monospace;font-size:12px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.6);border:1px solid #333;";
+        document.body.appendChild(div);
+        return (msg, type='info') => {
+            const p = document.createElement('div');
+            p.style.marginBottom = '4px';
+            p.style.borderBottom = '1px solid #222';
+            p.style.paddingBottom = '2px';
+            p.style.wordBreak = 'break-all';
+            if (type === 'error') p.style.color = '#ff5555';
+            if (type === 'success') p.style.color = '#55ff55';
+            if (type === 'warn') p.style.color = '#ffcc00';
+            if (type === 'debug') p.style.color = '#888888';
+            p.innerText = \`[\${new Date().toLocaleTimeString()}] \${msg}\`;
+            div.appendChild(p);
+            div.scrollTop = div.scrollHeight;
+            console.log(\`[BiliHelper] \${msg}\`);
+        };
+    };
+    const log = createLogger();
+
+    // --- 核心依赖: MD5 实现 (完整版) ---
+    var md5 = function() {
+        function e(e, n) {
+            var t = (65535 & e) + (65535 & n);
+            return (e >> 16) + (n >> 16) + (t >> 16) << 16 | 65535 & t
+        }
+        function n(e, n, t, r, o, i) {
+            return e = (n & t | ~n & r) + e + o + i, e = (e << (i = e) | e >>> 32 - i) + n
+        }
+        function t(e, n, t, r, o, i) {
+            return e = (n & r | t & ~r) + e + o + i, e = (e << (i = e) | e >>> 32 - i) + n
+        }
+        function r(e, n, t, r, o, i) {
+            return e = (n ^ t ^ r) + e + o + i, e = (e << (i = e) | e >>> 32 - i) + n
+        }
+        function o(e, n, t, r, o, i) {
+            return e = (t ^ (n | ~r)) + e + o + i, e = (e << (i = e) | e >>> 32 - i) + n
+        }
+        function i(i, a) {
+            i[a >> 5] |= 128 << a % 32, i[14 + (a + 64 >>> 9 << 4)] = a;
+            var c, u, s, l, f = 1732584193, d = -271733879, h = -1732584194, p = 271733878;
+            for (c = 0; c < i.length; c += 16) u = f, s = d, l = h, h = p, 
+            f = n(f, d, h, p = o(p, f, d, h, i[c + 15], 21, -660478335), i[c], 7, -680876936),
+            h = o(h, p, f, d, i[c + 6], 10, -42063),
+            d = o(d, h, p, f, i[c + 1], 15, -1990404162),
+            f = o(f, d, h, p, i[c + 8], 21, 1804603682),
+            h = o(h, p, f, d, i[c + 15], 6, -40341101),
+            d = r(d, h, p, f, i[c + 1], 4, -1530992060),
+            f = r(f, d, h, p, i[c + 4], 11, 1272893353),
+            h = r(h, p, f, d, i[c + 7], 16, -155497632),
+            d = r(d, h, p, f, i[c + 10], 23, -1094730640),
+            f = r(f, d, h, p, i[c + 13], 4, 681279174),
+            h = r(h, p, f, d, i[c], 11, -358537222),
+            d = r(d, h, p, f, i[c + 3], 16, -722521979),
+            f = r(f, d, h, p, i[c + 6], 23, 76029189),
+            h = r(h, p, f, d, i[c + 9], 4, -640364487),
+            d = r(d, h, p, f, i[c + 12], 11, -421815835),
+            f = r(f, d, h, p, i[c + 15], 16, 530742520),
+            h = t(h, p, f, d = r(d, h, p, f, i[c + 2], 23, -995338651), i[c], 6, -198630844),
+            f = t(f, d, h, p, i[c + 7], 10, 1126891415),
+            d = t(d, h, p, f, i[c + 14], 15, -1416354905),
+            h = t(h, p, f, d, i[c + 5], 21, -57434055),
+            f = t(f, d, h, p, i[c + 12], 6, 1700485571),
+            d = t(d, h, p, f, i[c + 3], 10, -1894986606),
+            h = t(h, p, f, d, i[c + 10], 15, -1051523),
+            f = t(f, d, h, p, i[c + 1], 21, -2054922799),
+            d = t(d, h, p, f, i[c + 8], 6, 1873313359),
+            h = t(h, p, f, d, i[c + 15], 10, -30611744),
+            f = t(f, d, h, p, i[c + 6], 15, -1560198380),
+            d = t(d, h, p, f, i[c + 13], 21, 1309151649),
+            h = t(h, p, f, d, i[c + 4], 6, -145523070),
+            f = t(f, d, h, p, i[c + 11], 10, -1120210379),
+            d = t(d, h, p, f, i[c + 2], 15, 718787259),
+            h = e(h, l), p = e(p, u), f = e(f, c), d = e(d, s);
+            return [f, d, h, p]
+        }
+        function a(e) {
+            var n, t = "";
+            for (n = 0; n < 32 * e.length; n += 8) t += String.fromCharCode(e[n >> 5] >>> n % 32 & 255);
+            return t
+        }
+        function c(e) {
+            var n, t = [];
+            for (t[(e.length >> 2) - 1] = void 0, n = 0; n < t.length; n += 1) t[n] = 0;
+            for (n = 0; n < 8 * e.length; n += 8) t[n >> 5] |= (255 & e.charCodeAt(n / 8)) << n % 32;
+            return t
+        }
+        function u(e) {
+            var n, t, r = "";
+            for (n = 0; n < e.length; n += 1) t = e[n], r += "0123456789abcdef".charAt(t >> 4 & 15) + "0123456789abcdef".charAt(15 & t);
+            return r
+        }
+        return function(e) {
+            return u(function(e) {
+                var n, t = [];
+                for (n = 0; n < 32 * e.length; n += 8) t.push(e[n >> 5] >>> n % 32 & 255);
+                return t
+            }(i(c(e), 8 * e.length)))
+        }
+    }();
+
+    // --- 核心依赖: Wbi 签名 ---
+    const MIXIN_KEY_ENC_TAB = [
+        46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 
+        33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40, 
+        61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11, 
+        36, 20, 34, 44, 52
+    ];
+
+    const getMixinKey = (orig) => MIXIN_KEY_ENC_TAB.map(n => orig[n]).join('').slice(0, 32);
+
+    const getWbiKeys = async () => {
+        const res = await fetch('https://api.bilibili.com/x/web-interface/nav', {
+            credentials: 'include'
+        });
+        const json = await res.json();
+        if(json.code !== 0) {
+            throw new Error(\`无法获取 Wbi Keys (Code: \${json.code}), 请确保已在 B 站登录\`);
+        }
+        const img_url = json.data.wbi_img.img_url;
+        const sub_url = json.data.wbi_img.sub_url;
+        return {
+            img_key: img_url.substring(img_url.lastIndexOf('/') + 1, img_url.lastIndexOf('.')),
+            sub_key: sub_url.substring(sub_url.lastIndexOf('/') + 1, sub_url.lastIndexOf('.'))
+        };
+    };
+
+    const encWbi = (params, img_key, sub_key) => {
+        const mixin_key = getMixinKey(img_key + sub_key);
+        const curr_time = Math.round(Date.now() / 1000);
+        const chr_filter = /[!'()*]/g;
+        
+        Object.assign(params, { wts: curr_time }); 
+        
+        const query = Object.keys(params)
+            .sort()
+            .map(key => {
+                const value = params[key].toString().replace(chr_filter, '');
+                return \`\${encodeURIComponent(key)}=\${encodeURIComponent(value)}\`;
+            })
+            .join('&');
+            
+        const wbi_sign = md5(query + mixin_key);
+        return query + '&w_rid=' + wbi_sign;
+    };
+
+    // --- 辅助函数 ---
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    
+    const getCookie = (name) => {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    };
+
+    // --- 主流程 ---
+    try {
+        log('🚀 初始化脚本...');
+        log('🔐 获取加密密钥 (Wbi Keys)...');
+        
+        const { img_key, sub_key } = await getWbiKeys();
+        log('✅ 密钥获取成功');
+
+        log('📂 获取收藏夹列表...');
+        const csrf = getCookie('bili_jct');
+        if(!csrf) {
+             log('💥 未找到 CSRF Token (bili_jct) cookie', 'error');
+             throw new Error('无法获取 CSRF Token，请尝试重新登录或刷新页面');
+        }
+        
+        const userId = getCookie('DedeUserID');
+        if(!userId) throw new Error('无法获取 User ID，请确保已登录');
+
+        const folderRes = await fetch(\`https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=\${userId}&jsonp=jsonp\`, {
+            credentials: 'include'
+        });
+        const folderJson = await folderRes.json();
+        
+        if(folderJson.code !== 0) throw new Error('获取收藏夹失败: ' + folderJson.message);
+        
+        const list = folderJson.data.list;
+        if(!list || list.length === 0) throw new Error('未找到任何收藏夹');
+
+        // 选择收藏夹
+        let msg = "请找到目标收藏夹的【数字ID】，输入下方框中：\\n";
+        list.forEach((f) => {
+            msg += \`[\${f.id}] \${f.title} (\${f.media_count}个内容)\\n\`;
+        });
+        
+        // 默认使用第一个收藏夹 ID
+        const defaultId = list[0] ? list[0].id : '';
+        const targetId = prompt(msg, defaultId);
+        if(!targetId) return log('❌ 用户取消操作', 'warn');
+        
+        // 验证 ID
+        const targetFolder = list.find(f => f.id == targetId);
+        log(\`🎯 目标收藏夹 ID: \${targetId} (\${targetFolder ? targetFolder.title : '未知名称'})\`);
+
+        let successCount = 0;
+        let failCount = 0;
+
+        for (let i = 0; i < songList.length; i++) {
+            const term = songList[i];
+            const progressStr = \`[\${i + 1}/\${songList.length}]\`;
+            
+            try {
+                log(\`\${progressStr} 🔍 搜索: \${term}\`);
+                
+                const searchParams = {
+                    keyword: term,
+                    search_type: 'video',
+                    page: 1,
+                    page_size: 1
+                };
+                const query = encWbi(searchParams, img_key, sub_key);
+                const searchRes = await fetch(\`https://api.bilibili.com/x/web-interface/wbi/search/type?\${query}\`, {
+                    credentials: 'include'
+                });
+                
+                if (!searchRes.ok) {
+                   log(\`\${progressStr} ❌ 网络错误: \${searchRes.status}\`, 'error');
+                   failCount++;
+                   await sleep(interval);
+                   continue;
+                }
+
+                const searchJson = await searchRes.json();
+                
+                if (searchJson.code !== 0) {
+                    log(\`\${progressStr} ❌ 搜索API错误: \${searchJson.message}\`, 'error');
+                    failCount++;
+                    continue;
+                }
+
+                const results = searchJson.data.result;
+                if (!results || results.length === 0) {
+                    log(\`\${progressStr} ⚠️ 未找到结果\`, 'warn');
+                    failCount++;
+                    continue;
+                }
+
+                const video = results[0];
+                // IMPORTANT: 尝试多种方式获取 aid (Numeric ID)
+                // 某些 API 返回 'id', 某些返回 'aid'
+                const aid = video.id || video.aid;
+                const title = video.title ? video.title.replace(/<[^>]+>/g, "") : "Unknown Title";
+                
+                if (!aid) {
+                    console.error('Video Object Error:', video);
+                    log(\`\${progressStr} ❌ 无法解析视频 AID (ID缺失), 已跳过. 详情见Console.\`, 'error');
+                    failCount++;
+                    continue;
+                }
+
+                log(\`\${progressStr} ⏳ 正在收藏 [AV\${aid}] \${title.slice(0, 15)}...\`, 'debug');
+
+                // 收藏请求 (POST)
+                const addData = new URLSearchParams();
+                addData.append('rid', aid); 
+                addData.append('type', '2'); 
+                addData.append('add_media_ids', targetId); // FIX: use add_media_ids for new API
+                addData.append('csrf', csrf);
+                addData.append('platform', 'web');
+
+                const addRes = await fetch('https://api.bilibili.com/x/v3/fav/resource/deal', {
+                    method: 'POST',
+                    body: addData,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    credentials: 'include'
+                });
+                const addJson = await addRes.json();
+
+                if(addJson.code === 0) {
+                    log(\`\${progressStr} ✅ 成功收藏\`, 'success');
+                    successCount++;
+                } else if (addJson.code === 11007) {
+                    log(\`\${progressStr} ⚠️ 视频已在收藏夹中\`, 'warn');
+                    successCount++;
+                } else {
+                    log(\`\${progressStr} ❌ 收藏API失败 (Code: \${addJson.code}): \${addJson.message}\`, 'error');
+                    failCount++;
+                }
+
+            } catch (e) {
+                log(\`\${progressStr} ❌ 异常: \${e.message}\`, 'error');
+                failCount++;
+            }
+
+            await sleep(interval);
+        }
+
+        log(\`🎉 任务完成! 成功: \${successCount}, 失败: \${failCount}\`, 'success');
+        alert(\`任务完成!\\n成功: \${successCount}\\n失败: \${failCount}\`);
+
+    } catch (e) {
+        log('💥 致命错误: ' + e.message, 'error');
+        console.error(e);
+    }
+})();
+  `;
+};
+
+
+      // --- COMPONENTS ---
+
+      const Header = () => {
+        return (
+          <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-pink-500 p-2 rounded-lg">
+                  <Music className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white tracking-tight">BiliPlaylist <span className="text-pink-500">Offline</span></h1>
+                  <p className="text-xs text-gray-400">本地模式 (无需 API Key)</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                 <div className="hidden md:flex items-center text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full">
+                   <AlertCircle className="w-3 h-3 mr-2" />
+                   Local Regex Parser
+                </div>
+              </div>
+            </div>
+          </header>
+        );
+      };
+
+      const App = () => {
+        const [rawText, setRawText] = useState('');
+        const [songs, setSongs] = useState([]);
+        const [status, setStatus] = useState(ProcessingStatus.IDLE);
+        const [errorMsg, setErrorMsg] = useState('');
+        const [showScript, setShowScript] = useState(false);
+        const [scriptConfig, setScriptConfig] = useState({ interval: 2000, autoClose: false });
+        
+        const fileInputRef = useRef(null);
+
+        const handleFileUpload = (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const text = e.target?.result;
+            setRawText(text);
+            processWithLocalRegex(text);
+          };
+          reader.readAsText(file);
+        };
+
+        const processWithLocalRegex = async (text) => {
+          if (!text.trim()) return;
+          
+          setStatus(ProcessingStatus.PARSING);
+          setShowScript(false);
+          setErrorMsg('');
+          
+          try {
+            // Use the injected local parser
+            const parsedTerms = await parsePlaylistWithGemini(text);
+            
+            if (parsedTerms.length === 0) {
+                throw new Error("未能识别出有效歌曲，请检查文件格式。");
+            }
+
+            const newSongs = parsedTerms.map((term, index) => ({
+              id: `song-${index}-${Date.now()}`,
+              originalText: "Local Parsed",
+              searchTerm: term
+            }));
+            setSongs(newSongs);
+            setStatus(ProcessingStatus.SUCCESS);
+          } catch (err) {
+            setStatus(ProcessingStatus.ERROR);
+            setErrorMsg(err.message || '解析失败');
+          }
+        };
+
+        const removeSong = (id) => {
+          setSongs(prev => prev.filter(s => s.id !== id));
+        };
+
+        const updateSong = (id, newValue) => {
+          setSongs(prev => prev.map(s => s.id === id ? { ...s, searchTerm: newValue } : s));
+        };
+
+        const generatedScript = generateBilibiliScript(songs, scriptConfig);
+
+        const copyToClipboard = () => {
+          navigator.clipboard.writeText(generatedScript);
+          alert('代码已复制！请在 Bilibili 网页控制台执行。');
+        };
+
+        return (
+          <div className="min-h-screen bg-[#0f0f0f] text-gray-200 flex flex-col">
+            <Header />
+            <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 gap-8 grid grid-cols-1 lg:grid-cols-2">
+              
+              <div className="space-y-6">
+                <div 
+                  className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition-colors cursor-pointer group
+                    ${status === ProcessingStatus.PARSING ? 'border-pink-500/50 bg-pink-500/5' : 'border-gray-700 hover:border-pink-500 hover:bg-gray-800/50'}`}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept=".txt,.md,.csv" 
+                    onChange={handleFileUpload} 
+                  />
+                  {status === ProcessingStatus.PARSING ? (
+                    <div className="flex flex-col items-center animate-pulse">
+                      <RefreshCw className="w-10 h-10 text-pink-500 mb-3 animate-spin" />
+                      <span className="text-pink-400 font-medium">正在本地解析...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="w-10 h-10 text-gray-400 mb-3 group-hover:text-pink-500 transition-colors" />
+                      <h3 className="text-lg font-medium text-white">上传歌单 TXT 文件</h3>
+                      <p className="text-sm text-gray-500 mt-1">本地模式 - 自动清理格式</p>
+                    </>
+                  )}
+                </div>
+
+                {status === ProcessingStatus.ERROR && (
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-lg flex items-start text-red-400">
+                    <AlertTriangle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                    <p>{errorMsg}</p>
+                  </div>
+                )}
+
+                {songs.length > 0 && (
+                  <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden flex flex-col max-h-[600px]">
+                    <div className="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-800/30">
+                      <div className="flex items-center space-x-2">
+                        <Check className="w-4 h-4 text-green-400" />
+                        <span className="font-medium text-white">已识别 {songs.length} 首歌曲</span>
+                      </div>
+                      <button 
+                        onClick={() => setSongs([])}
+                        className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+                      >
+                        清空
+                      </button>
+                    </div>
+                    
+                    <div className="overflow-y-auto p-2 space-y-2 flex-1 custom-scrollbar">
+                      {songs.map((song) => (
+                        <div key={song.id} className="group flex items-center gap-2 bg-gray-800/40 p-2 rounded-md border border-transparent hover:border-pink-500/30 transition-all">
+                          <Music className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                          <input 
+                            type="text" 
+                            value={song.searchTerm} 
+                            onChange={(e) => updateSong(song.id, e.target.value)}
+                            className="bg-transparent flex-1 text-sm text-gray-200 focus:outline-none min-w-0"
+                          />
+                          <button 
+                            onClick={() => removeSong(song.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/20 hover:text-red-400 rounded shrink-0"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="p-4 border-t border-gray-800 bg-gray-800/30">
+                      <button 
+                        onClick={() => setShowScript(true)}
+                        className="w-full bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-500 hover:to-pink-400 text-white py-3 rounded-lg font-medium transition-all flex items-center justify-center shadow-lg shadow-pink-900/20 transform active:scale-[0.99]"
+                      >
+                        <Terminal className="w-5 h-5 mr-2" />
+                        生成全自动脚本
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={`space-y-6 transition-all duration-500 ${showScript ? 'opacity-100 translate-y-0' : 'opacity-30 translate-y-8 pointer-events-none filter blur-sm'}`}>
+                
+                <div className="bg-[#1a1b1e] border border-gray-800 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5">
+                  <div className="p-4 border-b border-gray-800 bg-gray-900/80 flex items-center justify-between">
+                    <h3 className="font-semibold text-white flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></div>
+                      Automation Script (JS)
+                    </h3>
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2 bg-gray-800/50 rounded-lg px-2 py-1 border border-gray-700">
+                        <Settings className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs text-gray-400">间隔:</span>
+                        <select 
+                          value={scriptConfig.interval}
+                          onChange={(e) => setScriptConfig({...scriptConfig, interval: parseInt(e.target.value)})}
+                          className="bg-transparent text-xs text-pink-400 focus:outline-none font-mono"
+                        >
+                          <option value={2000}>2.0s</option>
+                          <option value={3000}>3.0s</option>
+                          <option value={5000}>5.0s</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-[#0d1117] to-transparent pointer-events-none z-10"></div>
+                    <pre className="p-4 overflow-x-auto text-xs sm:text-sm text-blue-100 font-mono bg-[#0d1117] h-[500px] custom-scrollbar leading-relaxed">
+                      <code>{generatedScript}</code>
+                    </pre>
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      <button 
+                        onClick={copyToClipboard}
+                        className="bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 rounded-lg text-xs font-medium flex items-center shadow-lg transform active:scale-95 transition-all"
+                      >
+                        <Copy className="w-3 h-3 mr-2" />
+                        复制代码
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gray-900/50 border-t border-gray-800">
+                    <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                      <ExternalLink className="w-4 h-4 mr-2 text-pink-500" />
+                      使用步骤
+                    </h4>
+                    <ol className="text-sm text-gray-400 space-y-2 list-decimal list-inside marker:text-pink-500/50">
+                      <li>复制上方代码。</li>
+                      <li>打开 <a href="https://www.bilibili.com" target="_blank" className="text-pink-400 hover:underline">Bilibili</a> 并登录账号。</li>
+                      <li>按 <kbd className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-200 font-mono text-xs border border-gray-600">F12</kbd> 打开控制台 (Console)。</li>
+                      <li>粘贴代码并回车运行。</li>
+                    </ol>
+                  </div>
+                </div>
+
+              </div>
+
+            </main>
+          </div>
+        );
+      };
+
+      // Main Mounting Logic
+      try {
+        const container = document.getElementById('root');
+        if (container) {
+            const root = createRoot(container);
+            root.render(<App />);
+            console.log("React mounted successfully.");
+            const loader = document.getElementById('loading-screen');
+            if(loader) loader.style.display = 'none';
+        } else {
+            console.error("Root element not found!");
+        }
+      } catch (e) {
+        console.error("Mounting Error:", e);
+        throw e;
+      }
+    </script>
+  </body>
+</html>
