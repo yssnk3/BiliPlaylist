@@ -564,12 +564,24 @@ function escapeHtml(str) {
 }
 // ============================================================
 // Playlist URL Recognition & Fetching (直接/间接识别)
+// 支持: B站歌单/收藏夹、网易云音乐、QQ音乐、汽水音乐、酷狗、酷我、咪咕
 // ============================================================
 const PROXIES = [
   u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
   u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+  u => 'https://thingproxy.freeboard.io/fetch/' + u,
 ];
+
+async function fetchTextAuto(url) {
+  // 部分站点(如 y.qq.com)对无 UA 请求返回空壳页，统一附带浏览器 UA
+  const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(12000), credentials: 'omit', headers: H });
+    if (res.ok) { const t = await res.text(); if (t && t.length > 200) return t; }
+  } catch {}
+  return fetchViaProxy(url);
+}
 
 function fid0(u){ return u.searchParams.get('fid') || u.searchParams.get('media_id'); }
 function parseBiliUrl(input) {
@@ -642,6 +654,43 @@ async function fetchJsonAuto(apiUrl) {
     throw new Error(j.message || ('API错误 code=' + j.code));
   }
   return j;
+}
+
+const SHORT_HOST_RE = /^(b23\.tv|url\.cn|t\.cn|u\.163\.com|c\.y.qq\.com|d\.music\.163\.com|music\.163\.com|y\.qq\.com|qishui\.music|www\.qishui\.music|kugou\.com|www\.kugou\.com|kuwo\.cn|www\.kuwo\.cn|m\.guoshance|miguvideo?\.com|aifantv)/i;
+
+// 通用短链展开：优先跟随重定向读取 res.url；被 CORS 拦截时走代理读取 HTML 中的跳转目标
+async function resolveShortUrlGeneric(shortUrl) {
+  // 从任意 HTML/文本中提取跳转目标（meta refresh / location.href / <a href>）
+  const pickTarget = (text) => {
+    const pats = [
+      /(?:location\.href|window\.location)\s*=\s*['"]([^'"]+)['"]/i,
+      /url=['"]?([^'">;\s]+)['"]?/i,                       // meta http-equiv=refresh
+      /<a[^>]+href=["']((?:https?:)?\/\/[^"']+)["']/i,
+      /"(https?:\/\/[^"]+)"/i,
+    ];
+    for (const p of pats) {
+      const m = String(text).match(p);
+      if (m && /^https?:\/\//i.test(m[1])) return m[1];
+      if (m && /^\/\//.test(m[1])) return 'https:' + m[1];
+    }
+    return null;
+  };
+  try {
+    const res = await fetch(shortUrl, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(10000), credentials: 'omit' });
+    const finalUrl = decodeURIComponent(res.url || '');
+    if (finalUrl && finalUrl !== shortUrl && !SHORT_HOST_RE.test(new URL(finalUrl).hostname)) return finalUrl;
+    // 有些服务把跳转写在响应页面里
+    const html = await res.text();
+    const t = pickTarget(html);
+    if (t) return t;
+    if (finalUrl && finalUrl !== shortUrl) return finalUrl;
+  } catch {}
+  const text = await fetchViaProxy(shortUrl);
+  const t = pickTarget(text);
+  if (t) return t;
+  const m = text.match(/https?:\/\/[^"'<>\s\\]+/i);
+  if (m && !SHORT_HOST_RE.test(new URL(m[0]).hostname)) return m[0];
+  throw new Error('无法解析短链接，请在浏览器打开后复制完整地址');
 }
 
 async function resolveShortUrl(shortUrl) {
@@ -720,6 +769,312 @@ async function fetchPlaylistFromUrl(rawInput) {
     return { sourceType: 'medialist', id: String(sc.meta.id), name: sc.meta.name, items: items };
   }
   throw new Error('暂不支持该类型的链接，请使用歌单(/medialist/...)、收藏夹(?fid=...)或 UP 主空间页地址');
+}
+
+// ============================================================
+// 国内主流音乐平台歌单解析（网易云 / QQ音乐 / 汽水 / 酷狗 / 酷我 / 咪咕）
+// 均为游客可读的公开接口；跨域时自动经由 CORS 代理通道访问。
+// 解析结果为「歌曲名 + 歌手」文本任务，交由 B 站搜索匹配（可叠加播放量/收藏数筛选）。
+// ============================================================
+const PLATFORM_DEFS = [
+  { key: 'netease',   name: '网易云音乐', hosts: ['music.163.com', 'music.163.com.163'      ], re: null },
+  { key: 'qqmusic',   name: 'QQ音乐',     hosts: ['y.qq.com', 'music.qq.com', 'i.music.y.qq.com'], re: null },
+  { key: 'qishui',    name: '汽水音乐',   hosts: ['qishui.music', 'www.qishui.music', 'qishui.douyin.com', 'www.qishui.douyin.com'], re: null },
+  { key: 'kugou',     name: '酷狗音乐',   hosts: ['kugou.com', 'www.kugou.com', 'm.kugou.com', 'songlist.kugou.com'], re: null },
+  { key: 'kuwo',      name: '酷我音乐',   hosts: ['kuwo.cn', 'www.kuwo.cn', 'y.kuwo.cn'], re: null },
+  { key: 'migu',      name: '咪咕音乐',   hosts: ['migu.cn', 'music.migu.cn', 'aifantv.migu.cn'], re: null },
+];
+
+function detectMusicPlatform(urlStr) {
+  let u; try { u = new URL(urlStr); } catch { return null; }
+  const host = u.hostname.replace(/^m\./, '').toLowerCase();
+  for (const p of PLATFORM_DEFS) {
+    if (p.hosts.some(h => host === h || host.endsWith('.' + h))) return p;
+  }
+  return null;
+}
+
+function extractFirstUrl(text) {
+  const m = String(text || '').match(/https?:\/\/[^"'<>\s\\]+/i);
+  return m ? m[0] : null;
+}
+
+// ---- 网易云音乐 ----
+async function fetchNeteasePlaylist(inputUrl) {
+  let id = null;
+  const hashId = inputUrl.match(/[?&#]id=(\d+)/i) || inputUrl.match(/playlist\/(\d+)/i);
+  if (hashId) id = hashId[1];
+  if (!id) {
+    // 短链 music.163.com/song/... 之类先展开
+    const real = await resolveShortUrlGeneric(inputUrl);
+    const h = real.match(/[?&#]id=(\d+)/i) || real.match(/playlist\/(\d+)/i);
+    if (h) id = h[1];
+  }
+  if (!id) throw new Error('未能从链接中提取网易云歌单ID（应包含 playlist/xxxxx 或 ?id=xxxxx）');
+  const api = 'https://music.163.com/api/playlist/detail?id=' + encodeURIComponent(id) + '&n=1000';
+  const text = await fetchTextAuto(api);
+  let j; try { j = JSON.parse(text); } catch { throw new Error('网易云接口返回非JSON（可能触发风控），可稍后重试或用TXT导入'); }
+  const pl = j.result || j.playlist;
+  if (!pl || !(pl.trackIds || pl.tracks)) throw new Error('网易云歌单不存在、为私密歌单或已被删除 (code=' + (j.code||'?') + ')');
+  const name = pl.name || ('网易云歌单' + id);
+  let tracks = pl.tracks || [];
+  // 老接口只返回 trackIds 时，二次批量拉取
+  if (!tracks.length && Array.isArray(pl.trackIds)) {
+    const ids = pl.trackIds.slice(0, 1000).map(t => t.id);
+    const body = 'ids=' + JSON.stringify(ids) + '&c={}&brpmformat=999000';
+    let res;
+    try {
+      res = await fetch('https://music.163.com/api/v3/song/detail', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body, credentials: 'omit',
+      });
+    } catch { res = null; }
+    if (res && res.ok) {
+      const jj = await res.json();
+      tracks = (jj.songs || []).map(s => ({ id: s.id, name: s.name, ar: s.ar || s.artists || [] }));
+    } else {
+      const text2 = await fetchViaProxy('https://music.163.com/api/v3/song/detail?c=' + encodeURIComponent(JSON.stringify(ids.map(i => ({ id: i })))).replace(/%20/g, '+'));
+      const jj = JSON.parse(text2);
+      tracks = (jj.songs || []).map(s => ({ id: s.id, name: s.name, ar: s.ar || s.artists || [] }));
+    }
+  }
+  const items = [];
+  for (const t of tracks) {
+    const title = (t.name || '').trim();
+    if (!title) continue;
+    const author = (t.ar || t.artists || []).map(a => a.name).filter(Boolean).join(' / ');
+    items.push({ title, author, bvid: '', aid: 0 });
+  }
+  if (!items.length) throw new Error('网易云歌单为空或内容需VIP/本地权限');
+  return { sourceType: 'netease', id: String(id), name: name, platform: '网易云音乐', items };
+}
+
+// QQ音乐页面SSR兜底：从 https://y.qq.com/n/ryqq/playlist/<id> 渲染HTML中提取歌曲列表
+async function fetchQQMusicViaPageHtml(mid) {
+  const html = await fetchTextAuto('https://y.qq.com/n/ryqq/playlist/' + encodeURIComponent(mid));
+  const items = [];
+  // 结构: songlist__songname_txt"><a title="歌名" ...> ... songlist__artist"><a class="playlist__author" title="歌手"
+  const re = /songlist__songname_txt"><a title="([^"]{1,120})"[\s\S]{0,600}?songlist__artist"><a class="playlist__author" title="([^"]*)"/g;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    const title = m[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim();
+    const author = m[2].replace(/&amp;/g, '&').trim().replace(/\s+/g, ' ');
+    if (title && !/^(歌曲|歌手|专辑|时长)$/.test(title)) items.push({ title, author, bvid: '', aid: 0 });
+  }
+  return items;
+}
+
+// ---- QQ音乐 ----
+async function fetchQQMusicPlaylist(inputUrl) {
+  let mid = null;
+  const m2 = inputUrl.match(/playlist\/([\w-]+)/i);          // .../playlist/7841876543（优先，避免误取 ?id= 的其他值）
+  const m1 = inputUrl.match(/[?&#]id=([\w-]+)/i);            // y.qq.com/n/ryqq/playlist?id=xxx
+  if (m2) mid = m2[1]; else if (m1) mid = m1[1];
+  if (!mid) {
+    const real = await resolveShortUrlGeneric(inputUrl);
+    const mm = real.match(/playlist\/([\w-]+)/i) || real.match(/[?&#]id=([\w-]+)/i);
+    if (mm) mid = mm[1];
+  }
+  if (!mid) throw new Error('未能从链接中提取QQ音乐歌单ID（应包含 playlist/xxxx 或 ?id=xxxx）');
+  const api = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?type=1&json=1&utf8=1&onlysong=0&disstid=' +
+    encodeURIComponent(mid) + '&format=json&g_tk=5381&loginUin=0&hostUin=0&notice=0&platform=yqq&needNewCode=0';
+  let name = 'QQ音乐歌单' + mid, items = [];
+  try {
+    const text = await fetchTextAuto(api);
+    const j = JSON.parse(text);
+    const dl = j.cdlist || [];
+    if (dl.length && dl[0].tracklist) {
+      const d0 = dl[0];
+      name = d0.dissname || name;
+      for (const t of (d0.tracklist || [])) {
+        const title = (t.songname || '').trim();
+        if (!title) continue;
+        const author = (t.singer || []).map(s => s.name).filter(Boolean).join(' / ');
+        items.push({ title, author, bvid: '', aid: 0 });
+      }
+    }
+  } catch {}
+  if (!items.length) {
+    // 接口失败/风控 → 页面SSR兜底
+    try { items = await fetchQQMusicViaPageHtml(mid); } catch {}
+  }
+  if (!items.length) throw new Error('QQ音乐歌单不存在、为私密歌单，或平台风控无法抓取（可稍后重试或用TXT导入）');
+  return { sourceType: 'qqmusic', id: String(mid), name, platform: 'QQ音乐', items };
+}
+
+// ---- 汽水音乐（抖音音乐）----
+async function fetchQishuiPlaylist(inputUrl) {
+  // 歌单链接形如 https://qishui.douyin.com/qswl?...&collection_id=7xxxxxxxx 或含 modal_id/share_id
+  let cid = null;
+  const candidates = [inputUrl];
+  const mCid = inputUrl.match(/(?:collection_id|cid|playlist_id)=(\d{10,})/i);
+  if (!mCid) {
+    try { candidates.push(await resolveShortUrlGeneric(inputUrl)); } catch {}
+  }
+  for (const c of candidates) {
+    const mm = c.match(/(?:collection_id|cid|playlist_id|modal_id)=(\d{10,})/i);
+    if (mm) { cid = mm[1]; break; }
+  }
+  if (!cid) throw new Error('未能识别汽水音乐歌单ID（请复制App内「复制链接」的完整地址，需包含 collection_id=...）');
+  const api = 'https://www.qishui.douyin.com/api/collection/detail?collection_id=' + encodeURIComponent(cid);
+  let j = null;
+  try { j = JSON.parse(await fetchTextAuto(api)); } catch {}
+  if (!j || !j.data) {
+    // 备用：分享页内嵌 JSON
+    const html = await fetchTextAuto(candidates[candidates.length - 1]);
+    const jm = html.match(/"trackList"\s*:\s*(\[[^\]]*\])/i) || html.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\});/s);
+    if (jm) { try { j = { data: JSON.parse(jm[1]) }; } catch {} }
+  }
+  if (!j || !j.data) throw new Error('汽水音乐歌单获取失败（该平台的Web接口不稳定，建议改用TXT导出导入）');
+  const list = j.data.track_list || j.data.trackList || j.data.list || [];
+  const items = [];
+  for (const t of list) {
+    const title = ((t.title || t.name || (t.track && t.track.title) || '') + '').trim();
+    if (!title) continue;
+    const author = ((t.author || t.singer || (t.track && t.track.author) || '') + '').toString().replace(/^\[|\]$/g, '');
+    items.push({ title, author, bvid: '', aid: 0 });
+  }
+  if (!items.length) throw new Error('汽水音乐歌单为空');
+  return { sourceType: 'qishui', id: cid, name: (j.data.title || '汽水音乐歌单'), platform: '汽水音乐', items };
+}
+
+// ---- 酷狗音乐 ----
+async function fetchKugouViaPageHtml(sid) {
+  // 歌单页 SSR：https://www.kugou.com/songlist/<sid>/ （部分歌单可游客渲染）
+  const urls = ['https://www.kugou.com/songlist/' + encodeURIComponent(sid) + '/', 'http://m.kugou.com/kgshare/webapp/share.html?specialid=' + encodeURIComponent(sid)];
+  for (const u of urls) {
+    try {
+      const html = await fetchTextAuto(u);
+      const items = [];
+      let m;
+      const re1 = /"filename":"([^"]+)"[^{}]*?"singername":"([^"]*)"/g;   // 内嵌JSON
+      while ((m = re1.exec(html)) !== null) {
+        const raw = decodeURIComponent(m[1].replace(/\\u([\da-f]{4})/gi, (x,g)=>String.fromCharCode(parseInt(g,16))));
+        const title = raw.split('-').slice(1).join('-').trim() || raw.trim();
+        const author = decodeURIComponent(m[2].replace(/\\u([\da-f]{4})/gi, (x,g)=>String.fromCharCode(parseInt(g,16))));
+        if (title) items.push({ title, author, bvid: '', aid: 0 });
+      }
+      if (!items.length) {
+        const re2 = /title="([^"]{1,80})"[^>]*>\s*<\/a>[\s\S]{0,200}?singer/i; void re2; // (结构兜底见上)
+      }
+      if (items.length) return items;
+    } catch {}
+  }
+  return [];
+}
+
+async function fetchKugouPlaylist(inputUrl) {
+  let sid = inputUrl.match(/specialid[=_](\d+)/i) || inputUrl.match(/plat\/comment\/(\d+)/i) || inputUrl.match(/global_specialid=(\d+)/i) || inputUrl.match(/songlist\/(?:gkc_|gc_)?(\d+)/i);
+  if (!sid) {
+    try {
+      const real = await resolveShortUrlGeneric(inputUrl);
+      sid = real.match(/specialid[=_](\d+)/i) || real.match(/global_specialid=(\d+)/i) || real.match(/songlist\/(?:gkc_|gc_)?(\d+)/i);
+    } catch {}
+  }
+  if (!sid) throw new Error('未能识别酷狗歌单ID（链接应包含 specialid=xxxxx 或 songlist/xxxx）');
+  const api = 'https://msearch.kugou.com/clientuser/plist.php?specialid[]=' + encodeURIComponent(sid[1]);
+  const text = await fetchTextAuto(api);
+  let items = [];
+  try {
+    const j = JSON.parse(text);
+    const info = j[sid[1]] || j[String(sid[1])] || Object.values(j)[0];
+    const list = (info && (info.list || info.songs)) || [];
+    for (const t of list) {
+      const title = (t.songname || t.filename || '').split('-').pop().trim() || (t.song_name || '').trim();
+      const author = (t.singername || t.author_name || '').trim();
+      if (title) items.push({ title, author, bvid: '', aid: 0 });
+    }
+  } catch {
+    const rows = String(text).match(/"songname":"([^"]+)"[^}]*?"singername":"([^"]+)"/g) || [];
+    for (const r of rows) {
+      const ms = r.match(/"songname":"([^"]*)"[\s\S]*?"singername":"([^"]*)"/);
+      if (ms) items.push({ title: decodeURIComponent(ms[1].replace(/\\u([\da-f]{4})/gi, (m,g)=>String.fromCharCode(parseInt(g,16)))), author: decodeURIComponent(ms[2].replace(/\\u([\da-f]{4})/gi, (m,g)=>String.fromCharCode(parseInt(g,16)))), bvid: '', aid: 0 });
+    }
+  }
+  if (!items.length) items = await fetchKugouViaPageHtml(sid[1]);
+  if (!items.length) throw new Error('酷狗歌单获取失败或为空（该接口可能需Referer头，建议改用TXT导出导入）');
+  return { sourceType: 'kugou', id: sid[1], name: '酷狗歌单' + sid[1], platform: '酷狗音乐', items };
+}
+
+// ---- 酷我音乐 ----
+async function fetchKuwoPlaylist(inputUrl) {
+  let rid = inputUrl.match(/rid=(\d+)/i) || inputUrl.match(/kuwo\.cn\/playlist_details[^/]*?(\d{6,})/i) || inputUrl.match(/playlists\/(\d+)/i);
+  if (!rid) {
+    try { const real = await resolveShortUrlGeneric(inputUrl); rid = real.match(/rid=(\d+)/i) || real.match(/(\d{6,})/); } catch {}
+  }
+  if (!rid) throw new Error('未能识别酷我歌单ID（链接应包含 rid=xxxxx）');
+  const api = 'http://www.kuwo.cn/api/www/playlist/playListInfo?rid=' + encodeURIComponent(rid[1]) + '&pn=1&ps=300&httpsStatus=1';
+  let items = [], name = '酷我歌单' + rid[1];
+  try {
+    const j = JSON.parse(await fetchTextAuto(api));
+    const pl = j.data && j.data.plist;
+    name = (j.data && j.data.name) || name;
+    for (const t of (pl || [])) {
+      const title = (t.name || '').trim();
+      if (title) items.push({ title, author: (t.artist || '').trim(), bvid: '', aid: 0 });
+    }
+  } catch {}
+  if (!items.length) {
+    // 旧版接口兜底
+    try {
+      const text = await fetchTextAuto('http://mobileservice.kuwo.cn/player/getPlaylistSongs?pid=' + encodeURIComponent(rid[1]));
+      const rows = String(text).match(/"name":"([^"]+)"[^}]*?"artist":"([^"]*)"/g) || [];
+      for (const r of rows) {
+        const ms = r.match(/"name":"([^"]*)"[\s\S]*?"artist":"([^"]*)"/);
+        if (ms) items.push({ title: ms[1], author: ms[2], bvid: '', aid: 0 });
+      }
+    } catch {}
+  }
+  if (!items.length) throw new Error('酷我歌单获取失败或为空（建议改用TXT导出导入）');
+  return { sourceType: 'kuwo', id: rid[1], name, platform: '酷我音乐', items };
+}
+
+// ---- 咪咕音乐 ----
+async function fetchMiguPlaylist(inputUrl) {
+  let cid = inputUrl.match(/(?:columnId|playlistId|albumId)=([\w]+)/i) || inputUrl.match(/collect\/([\w]+)/i);
+  if (!cid) {
+    try { const real = await resolveShortUrlGeneric(inputUrl); cid = real.match(/(?:columnId|playlistId|albumId)=([\w]+)/i) || real.match(/collect\/([\w]+)/i); } catch {}
+  }
+  if (!cid) throw new Error('未能识别咪咕歌单ID（链接应包含 columnId=... 或歌单页地址）');
+  const api = 'https://m.music.migu.cn/migumusic/h5/playlist/songs?playlistId=' + encodeURIComponent(cid[1]) + '&pageSize=200&pageIndex=0';
+  let items = [];
+  try {
+    const j = JSON.parse(await fetchTextAuto(api));
+    const list = (j.data && (j.data.songs || j.data.list)) || [];
+    for (const t of list) {
+      const title = (t.songName || t.name || '').trim();
+      if (title) items.push({ title, author: (t.singerName || t.artist || '').trim(), bvid: '', aid: 0 });
+    }
+  } catch {}
+  if (!items.length) throw new Error('咪咕歌单获取失败或为空（建议改用TXT导出导入）');
+  return { sourceType: 'migu', id: cid[1], name: '咪咕歌单' + cid[1], platform: '咪咕音乐', items };
+}
+
+const PLATFORM_FETCHERS = {
+  netease: fetchNeteasePlaylist, qqmusic: fetchQQMusicPlaylist, qishui: fetchQishuiPlaylist,
+  kugou: fetchKugouPlaylist, kuwo: fetchKuwoPlaylist, migu: fetchMiguPlaylist,
+};
+
+// 统一入口：自动识别 B站 / 网易云 / QQ音乐 / 汽水 / 酷狗 / 酷我 / 咪咕 链接
+async function fetchPlaylistFromAnyUrl(rawInput) {
+  const urlStr = extractFirstUrl(rawInput);
+  if (!urlStr) throw new Error('未检测到有效链接，请粘贴完整的 http(s) 歌单地址');
+  const bili = parseBiliUrl(urlStr);
+  if (bili) return fetchPlaylistFromUrl(urlStr);
+  const plat = detectMusicPlatform(urlStr);
+  if (plat) {
+    const fn = PLATFORM_FETCHERS[plat.key];
+    return fn(urlStr);
+  }
+  // 未知域名 → 尝试当作短链展开后再识别一轮
+  let real = null;
+  try { real = await resolveShortUrlGeneric(urlStr); } catch {}
+  if (real && real !== urlStr) {
+    const b2 = parseBiliUrl(real);
+    if (b2) return fetchPlaylistFromUrl(real);
+    const p2 = detectMusicPlatform(real);
+    if (p2) return PLATFORM_FETCHERS[p2.key](real);
+  }
+  throw new Error('无法识别该平台链接。当前支持：B站、网易云音乐、QQ音乐、汽水音乐、酷狗、酷我、咪咕');
 }
 
 // ============================================================
@@ -1244,18 +1599,18 @@ function renderStep1() {
   const fetching = state.status === STATUS.FETCHING;
   return `
     <div class="panel-card">
-      <div class="panel-title">${icons.link} 导入歌单（支持直接粘贴 B 站链接）</div>
+      <div class="panel-title">${icons.link} 导入歌单（支持 B站 + 国内主流音乐平台链接）</div>
       <div class="login-tabs">
         <span class="login-tab ${state.mode === 'url' ? 'active' : ''}" data-mode="url">🔗 歌单链接</span>
         <span class="login-tab ${state.mode === 'txt' ? 'active' : ''}" data-mode="txt">📄 TXT 文本</span>
       </div>
       ${state.mode === 'url' ? `
-        <label class="field-label">粘贴复制的歌单/收藏夹链接，自动识别解析（无需手动提取ID）</label>
+        <label class="field-label">粘贴复制的歌单链接，自动识别平台并解析（无需手动提取ID、无需导出TXT）</label>
         <div class="input-row">
-          <input class="text-input" id="url-input" placeholder="https://www.bilibili.com/medialist/jump/mlxxxxxxx 或 bilibili.com/video/BV...?fid=xxx 或 b23.tv 短链" value="${escapeHtml(state.urlInput)}" />
+          <input class="text-input" id="url-input" placeholder="网易云: music.163.com/playlist?id=... ｜ QQ音乐: y.qq.com/n/ryqq/playlist/... ｜ 汽水: qishui.douyin.com/...collection_id=... ｜ B站/酷狗/酷我/咪咕 亦可" value="${escapeHtml(state.urlInput)}" />
           <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-fetch" ${fetching ? 'disabled' : ''}>${fetching ? '识别中...' : '识别歌单'}</button>
         </div>
-        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">支持：歌单页(/medialist/、/list/ML)、收藏夹(?fid=)、UP主空间页、b23.tv 短链。直连失败时自动切换 CORS 代理通道。</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">已支持：<b>网易云音乐</b>、<b>QQ音乐</b>、<b>汽水音乐</b>、<b>酷狗</b>、<b>酷我</b>、<b>咪咕</b>、B站歌单/收藏夹/UP主空间页、各类短链(自动展开)。跨域受限时自动切换 CORS 代理通道；解析后的「歌曲-歌手」将进入 B 站搜索匹配流程（可叠加播放量/收藏数筛选）。私密/VIP歌单无法直接抓取，请改用TXT导入。</p>
       ` : `
         <label class="field-label">粘贴或上传歌单文本（每行一首「歌曲 - 歌手」，自动清洗格式）</label>
         <textarea class="text-input" id="txt-input" placeholder="夜曲 - 周杰伦&#10;晴天 - 周杰伦&#10;...">${escapeHtml(state.rawText)}</textarea>
@@ -1578,9 +1933,9 @@ async function doFetchUrl() {
   state.urlInput = input;
   state.status = STATUS.FETCHING; state.errorMsg = ''; render();
   try {
-    const pl = await fetchPlaylistFromUrl(input);
-    state.sourceName = pl.name || (pl.sourceType === 'favfolder' ? '收藏夹' + pl.id : '歌单' + pl.id);
-    state.tasks = pl.items.map(it => ({ term: it.title, author: it.author, exact: { bvid: it.bvid, aid: it.aid }, enabled: true }));
+    const pl = await fetchPlaylistFromAnyUrl(input);
+    state.sourceName = (pl.platform ? pl.platform + ' · ' : '') + (pl.name || (pl.sourceType === 'favfolder' ? '收藏夹' + pl.id : '歌单' + pl.id));
+    state.tasks = pl.items.map(it => ({ term: it.title, author: it.author, exact: (it.bvid ? { bvid: it.bvid, aid: it.aid } : null), enabled: true }));
     state.status = STATUS.SUCCESS;
   } catch (e) {
     state.status = STATUS.ERROR;
