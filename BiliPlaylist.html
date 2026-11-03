@@ -433,27 +433,76 @@
       z-index: 100;
     }
     #loading-screen .spinner { width: 48px; height: 48px; border-width: 4px; }
+  
+    /* ===== Wizard Steps ===== */
+    .steps-bar { display:flex; align-items:center; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+    .step-chip { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-size:13px; background:var(--bg-surface); color:var(--text-muted); border:1px solid var(--border); transition:all .2s; }
+    .step-chip.active { background:var(--pink-bg); color:var(--pink); border-color:rgba(251,114,153,.4); }
+    .step-chip.done { color:var(--green); border-color:rgba(74,222,128,.3); }
+    .step-chip svg { width:14px; height:14px; }
+
+    /* ===== Inputs & Forms ===== */
+    .field-label { display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px; font-weight:500; }
+    .text-input, textarea.text-input, select.text-input { width:100%; background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); padding:10px 12px; font-size:14px; outline:none; transition:border .2s; font-family:inherit; }
+    .text-input:focus { border-color:var(--pink); }
+    textarea.text-input { min-height:140px; resize:vertical; font-family:'Consolas','Monaco',monospace; font-size:13px; line-height:1.6; }
+    select.text-input { appearance:auto; }
+    .input-row { display:flex; gap:8px; margin-top:16px; }
+    .input-row .text-input { flex:1; }
+    .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-top:14px; }
+    .panel-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; }
+    .panel-title { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:600; margin-bottom:12px; }
+    .panel-title svg { width:18px; height:18px; color:var(--pink); }
+    .panel-sub { font-size:12px; color:var(--text-muted); margin-bottom:12px; }
+    .check-line { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-secondary); margin-top:12px; cursor:pointer; user-select:none; }
+    .check-line input { accent-color:var(--pink); width:15px; height:15px; }
+    .btn-secondary { background:var(--bg-surface); border:1px solid var(--border); color:var(--text-secondary); padding:10px 18px; border-radius:var(--radius-sm); font-size:14px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all .2s; }
+    .btn-secondary:hover { border-color:var(--pink); color:var(--pink); }
+    .btn-secondary svg { width:15px; height:15px; }
+    .hint-box { background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.25); color:#d9a441; border-radius:var(--radius-sm); padding:12px 14px; font-size:13px; line-height:1.7; margin-top:14px; }
+    .hint-box a { color:var(--pink); }
+
+    /* ===== Login Panel ===== */
+    .login-tabs { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+    .login-tab { padding:7px 16px; border-radius:999px; font-size:13px; cursor:pointer; border:1px solid var(--border); background:var(--bg-surface); color:var(--text-muted); transition:all .2s; }
+    .login-tab.active { background:var(--pink-bg); color:var(--pink); border-color:rgba(251,114,153,.4); }
+    .qr-frame { width:200px; height:200px; margin:0 auto; background:#fff; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+    .qr-frame img { width:100%; height:100%; object-fit:contain; }
+    .qr-overlay { position:absolute; inset:0; background:rgba(0,0,0,.75); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; text-align:center; border-radius:var(--radius-sm); padding:10px; }
+    .login-status { text-align:center; font-size:13px; margin-top:12px; color:var(--text-muted); }
+    .login-status.ok { color:var(--green); }
+    .login-status.err { color:var(--red); }
+    .cookie-ta { min-height:70px !important; }
+
+    /* ===== Folder List ===== */
+    .folder-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px; cursor:pointer; transition:all .15s; font-size:14px; }
+    .folder-item:hover { border-color:rgba(251,114,153,.4); }
+    .folder-item.selected { border-color:var(--pink); background:var(--pink-bg); }
+    .folder-item input { accent-color:var(--pink); }
+    .folder-count { margin-left:auto; font-size:12px; color:var(--text-muted); }
+
+    /* ===== Run Log ===== */
+    .run-log { background:#0d1117; border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; font-family:'Consolas','Monaco',monospace; font-size:12px; line-height:1.7; height:260px; overflow-y:auto; color:#8b949e; }
+    .run-log .ok { color:var(--green); }
+    .run-log .err { color:var(--red); }
+    .run-log .warn { color:var(--yellow); }
+    .progress-outer { height:8px; background:var(--bg-surface); border-radius:999px; overflow:hidden; margin:14px 0 6px; }
+    .progress-inner { height:100%; background:linear-gradient(90deg,#e95c8a,var(--pink)); width:0%; transition:width .3s; border-radius:999px; }
+    .stat-row { display:flex; gap:16px; font-size:13px; color:var(--text-muted); flex-wrap:wrap; }
+    .stat-row b { color:var(--text); }
   </style>
 </head>
 <body>
 
-<!-- Loading Screen -->
-<div id="loading-screen">
-  <div style="text-align:center">
-    <div class="spinner"></div>
-    <p style="color:var(--text-muted);font-size:14px">加载中...</p>
-  </div>
-</div>
-
 <!-- App -->
-<div id="app"></div>
+<div id="app"><div id="loading-screen" style="position:fixed;inset:0;background:var(--bg);display:flex;justify-content:center;align-items:center;z-index:100"><div style="text-align:center"><div class="spinner"></div><p style="color:var(--text-muted);font-size:14px">加载中...</p></div></div></div>
 
 <script>
 // ============================================================
 // BiliPlaylist — Pure Vanilla JS, Zero External Dependencies
+// Wizard: URL识别 → 筛选设置 → 多方式登录 → 一键执行
 // ============================================================
 
-// --- SVG Icons (inline, no external deps) ---
 const icons = {
   music: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
   upload: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
@@ -467,309 +516,964 @@ const icons = {
   refresh: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
 };
 
-// --- Status Constants ---
-const STATUS = { IDLE: 'IDLE', PARSING: 'PARSING', SUCCESS: 'SUCCESS', ERROR: 'ERROR' };
+// --- Extra SVG icons for wizard ---
+Object.assign(icons, {
+  link: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  login: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
+  folder: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+  play: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+});
 
 // ============================================================
-// Local Parser (same logic as before, no AI dependency)
+// TXT Line Helpers (清洗 + 歌名/歌手拆分)
 // ============================================================
-function parsePlaylist(text) {
-  if (!text) return [];
-  const lines = text.split(/[\r\n]+/);
-  const songs = [];
-  for (let line of lines) {
-    let clean = line.trim();
-    if (!clean) continue;
-    clean = clean.replace(/[\[\(]\d{2}:\d{2}(\.\d{2})?[\]\)]/g, '');
-    clean = clean.replace(/^[\[]?\d+[\]\)\.\s:：、]+/g, '');
-    clean = clean.replace(/\.(mp3|flac|wav|m4a|ogg|wma|aac)$/i, '');
-    clean = clean.replace(/(Official Video|Lyrics|MV|HQ|Remastered|Full Audio|\(.*?\))/gi, '');
-    clean = clean.replace(/[\-\s]+$/, '');
-    clean = clean.trim();
-    if (clean.length > 1 && !songs.includes(clean)) {
-      songs.push(clean);
-    }
+function cleanSongLine(line) {
+  let clean = line.trim();
+  if (!clean) return '';
+  clean = clean.replace(/[\[\(]\d{2}:\d{2}(\.\d{2})?[\]\)]/g, '');            // [03:24] timestamps
+  clean = clean.replace(/^[\[]?\d+[\]\)\.\s:：、]+/g, '');                        // leading numbering "1. " "01、"
+  clean = clean.replace(/\.(mp3|flac|wav|m4a|ogg|wma|aac)$/i, '');              // file extensions
+  clean = clean.replace(/(Official Video|Lyrics?|MV|HQ|Hi-?Res|Remastered|Full Audio|Live ?版?|伴奏|Instrumental)/gi, '');
+  clean = clean.replace(/【[^】]*】/g, m => m);                                   // keep 【】 markers untouched here
+  clean = clean.replace(/《([^》]+)》/g, '$1');                                    // strip 《》
+  clean = clean.replace(/^(播放|列表|歌单)?[:：]?\s*\d+\s*[\.、::]\s*/, '');
+  clean = clean.replace(/[-\s]+$/, '');
+  clean = clean.replace(/^[-\s]+/, '');
+  return clean.trim();
+}
+
+function isSeparatorLine(line) {
+  const t = line.replace(/\s/g, '');
+  return !t || /^[-=_*·•—–.。~`]+$/.test(t) || /^-{3,}$/.test(t);
+}
+
+function findSep(str) {
+  // 返回第一个「歌名/歌手」分隔符位置（优先半角/全角连字符，其次 /、&、feat）
+  const pats = [/ [-–—] /, /[-–—]/, /\s\/\s/, /\s&\s/, /\sfeat[\.]?\s/i, /\sft\./i, /[丨|]/];
+  for (const p of pats) {
+    const m = str.match(p);
+    if (m && m.index > 0) return m.index;
   }
-  return songs;
+  return -1;
+}
+
+function escapeHtml(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+// ============================================================
+// Playlist URL Recognition & Fetching (直接/间接识别)
+// ============================================================
+const PROXIES = [
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+];
+
+function fid0(u){ return u.searchParams.get('fid') || u.searchParams.get('media_id'); }
+function parseBiliUrl(input) {
+  if (!input) return null;
+  const m = String(input).trim().match(/https?:\/\/[^"'<>\s]+/i);
+  const urlStr = m ? m[0] : null;
+  if (!urlStr) return null;
+  let u;
+  try { u = new URL(urlStr); } catch { return null; }
+  const host = u.hostname.replace(/^m\./, '').toLowerCase();
+  if (!/(bilibili\.com|b23\.tv)$/i.test(host)) return null;
+  let mid = u.searchParams.get('mid') || u.searchParams.get('uid');
+  let sm = u.pathname.match(/^\/space\/(\d+)/);
+  if (sm) mid = mid || sm[1];
+  // medialist 优先（www.bilibili.com/medialist/jump/ml.., bilibili.com/list/ml.., space.bilibili.com/<mid>/list/ml..）
+  // /medialist/jump/ml... 或任意位置的 /list/ml...（如 space.bilibili.com/<mid>/list/ml...）
+  let mm2 = u.pathname.match(/^\/medialist\/jump\/m[lc](\d+)/i);
+  if (mm2) return { kind: 'medialist', sid: mm2[1], mid: mid || '', url: urlStr };
+  let ml = u.pathname.match(/(?:^|\/)list\/(?:ml|ML)?(\d+)/i);
+  if (ml) return { kind: 'medialist', sid: ml[1], mid: mid || '', url: urlStr };
+  let sp = u.pathname.match(/^\/(space\/)?(\d+)(\/|$)/);
+  if (sp && !fid0(u)) return { kind: 'space', mid: sp[2], url: urlStr };
+  if (host === 'b23.tv') return { kind: 'redirect', url: urlStr };
+  let mf = u.pathname.match(/^\/(?:video|favlist)?/);
+  let fid = u.searchParams.get('fid') || u.searchParams.get('media_id');
+  if (/^\/video\/(ML|mc)/i.test(u.pathname) && !fid) {
+    const mm = u.pathname.match(/^\/video\/(?:ML|mc)(\d+)/i);
+    if (mm) return { kind: 'medialist', sid: mm[1], mid: mid || '', url: urlStr };
+  }
+  if (fid) return { kind: 'favfolder', fid: fid, mid: mid || '', url: urlStr };
+  if (mid) return { kind: 'space', mid: mid, url: urlStr };
+  return { kind: 'unknown', url: urlStr };
+}
+
+async function fetchViaProxy(url) {
+  let lastErr = null;
+  for (const mk of PROXIES) {
+    try {
+      const res = await fetch(mk(url), { signal: AbortSignal.timeout(15000) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const text = await res.text();
+      if (text && text.length > 2) return text;
+      throw new Error('空响应');
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('所有网络通道均失败');
+}
+
+async function fetchJsonDirect(url) {
+  const res = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+async function fetchJsonAuto(apiUrl) {
+  // 优先直连（本页面与 B 站同属 https 时带 cookie 可用），失败则走 CORS 代理
+  try {
+    const j = await fetchJsonDirect(apiUrl);
+    if (j && j.code === 0) return j;
+    if (j && j.code === -101) throw new Error('账号未登录或需要隐私权限 (code -101)');
+    if (j && j.code !== 0) throw new Error((j.message || 'API错误 code=' + j.code));
+  } catch (e) {
+    if (String(e.message).indexOf('-101') >= 0) throw e;
+  }
+  const text = await fetchViaProxy(apiUrl);
+  let j;
+  try { j = JSON.parse(text); } catch { throw new Error('代理返回内容无法解析（可能被风控拦截），可尝试下载TXT模式'); }
+  if (j.code !== 0) {
+    if (j.code === -101) throw new Error('该歌单为私密内容，需切换到「浏览器控制台脚本」模式在已登录页面运行');
+    throw new Error(j.message || ('API错误 code=' + j.code));
+  }
+  return j;
+}
+
+async function resolveShortUrl(shortUrl) {
+  try {
+    const res = await fetch(shortUrl, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(10000) });
+    return decodeURIComponent(res.url);
+  } catch {
+    const text = await fetchViaProxy(shortUrl);
+    const m = text.match(/https?:\/\/www\.bilibili\.com[^"'\s<>\\]+/i);
+    if (m) return m[0];
+    throw new Error('无法解析短链接，请在浏览器打开后复制完整地址');
+  }
+}
+
+async function fetchMedialistItems(sid, mid) {
+  const items = [];
+  let pn = 1, ps = 20, total = -1;
+  while (total < 0 || items.length < total) {
+    const u = 'https://api.bilibili.com/x/v2/medialist/resource/list?type=1&biz_id=' + encodeURIComponent(sid) +
+      '&bvid=&mobi_app=web_pc&ps=' + ps + '&pn=' + pn + '&direction=false&sort_field=1&tid=0&with_current=false' +
+      (mid ? '&otype=mid&_user_mid=true&mid=' + encodeURIComponent(mid) : '');
+    const j = await fetchJsonAuto(u);
+    total = (j.data && j.data.media_count) || 0;
+    const ms = (j.data && j.data.media_list) || [];
+    if (ms.length === 0) break;
+    for (const it of ms) items.push({ title: (it.title || '').replace(/<[^>]*>/g, ''), author: (it.up_name || it.upper && it.upper.name || '').toString(), bvid: it.bvid || '', aid: it.aid || 0 });
+    if (items.length >= total) break;
+    pn++;
+    if (pn > 50) break; // 安全上限 1000 首
+  }
+  return items;
+}
+
+async function fetchFavFolderItems(fid, mid) {
+  const items = [];
+  let pn = 1, ps = 20, total = -1;
+  while (total < 0 || items.length < total) {
+    const u = 'https://api.bilibili.com/x/v3/fav/resource/list?media_id=' + encodeURIComponent(fid) +
+      '&pn=' + pn + '&ps=' + ps + '&keyword=&order=mtime&type=0&tid=0&platform=web' + (mid ? '&mid=' + encodeURIComponent(mid) : '');
+    const j = await fetchJsonAuto(u);
+    total = (j.data && j.data.info && j.data.info.media_count) || 0;
+    const ms = (j.data && j.data.medias) || [];
+    if (ms.length === 0) break;
+    for (const it of ms) items.push({ title: (it.title || '').replace(/<[^>]*>/g, ''), author: (it.upper && it.upper.name || '').toString(), bvid: it.bvid || '', aid: it.id || 0 });
+    if (items.length >= total) break;
+    pn++;
+    if (pn > 50) break;
+  }
+  return items;
+}
+
+async function fetchPlaylistFromUrl(rawInput) {
+  let target = parseBiliUrl(rawInput);
+  if (!target) throw new Error('无法识别该链接，请确认是 bilibili.com 或 b23.tv 的歌单/收藏夹地址');
+  if (target.kind === 'redirect') {
+    const real = await resolveShortUrl(target.url);
+    target = parseBiliUrl(real);
+    if (!target || target.kind === 'redirect' || target.kind === 'unknown') throw new Error('短链接解析后不是有效的歌单地址: ' + real.slice(0, 80));
+  }
+  if (target.kind === 'medialist') {
+    const items = await fetchMedialistItems(target.sid, target.mid);
+    if (!items.length) throw new Error('歌单为空或未找到内容');
+    return { sourceType: 'medialist', id: target.sid, items: items };
+  }
+  if (target.kind === 'favfolder') {
+    const items = await fetchFavFolderItems(target.fid, target.mid);
+    if (!items.length) throw new Error('收藏夹为空或未找到内容');
+    return { sourceType: 'favfolder', id: target.fid, items: items };
+  }
+  if (target.kind === 'space') {
+    const u = 'https://api.bilibili.com/x/v2/medialist/user/profile?show_face_collect_operation=0&up_mute_like_collection=0&mid=' + encodeURIComponent(target.mid);
+    const j = await fetchJsonAuto(u);
+    const sc = j.data && j.data.season_list && j.data.season_list[0];
+    if (!sc) throw new Error('该用户没有公开的歌单');
+    const items = await fetchMedialistItems(String(sc.meta.id), target.mid);
+    return { sourceType: 'medialist', id: String(sc.meta.id), name: sc.meta.name, items: items };
+  }
+  throw new Error('暂不支持该类型的链接，请使用歌单(/medialist/...)、收藏夹(?fid=...)或 UP 主空间页地址');
 }
 
 // ============================================================
-// Script Generator
+// 内置 Bilibili API 客户端（登录 + 歌单 + 搜索 + 收藏）
+// 依赖: md5 (由 build 注入), fetchJsonAuto, parseBiliUrl 等
 // ============================================================
-function generateBilibiliScript(songs, interval) {
-  const songListJson = JSON.stringify(songs);
-  return `// ============================================================================
-// BiliPlaylist - 自动收藏脚本
-// 生成时间: ${new Date().toLocaleString()}
-// ============================================================================
+const BI_API = 'https://api.bilibili.com';
 
-(async function() {
-    const songList = ${songListJson};
-    const interval = ${interval};
+async function biLoadKeys() {
+  const j = await fetchJsonAuto(BI_API + '/x/web-interface/nav');
+  if (!j.data || !j.data.wbi_img) throw new Error('未获取到 WBI 密钥，请确认账号已登录');
+  const img_url = j.data.wbi_img.img_url, sub_url = j.data.wbi_img.sub_key ? j.data.wbi_img.sub_url : j.data.wbi_img.sub_url;
+  BI_KEYS = {
+    img_key: img_url.substring(img_url.lastIndexOf('/') + 1, img_url.lastIndexOf('.')),
+    sub_key: sub_url.substring(sub_url.lastIndexOf('/') + 1, sub_url.lastIndexOf('.')),
+  };
+  return BI_KEYS;
+}
+let BI_KEYS = null;
 
-    const createLogger = () => {
-        const existing = document.getElementById('bili-helper-log');
-        if(existing) existing.remove();
-        const div = document.createElement('div');
-        div.id = 'bili-helper-log';
-        div.style = "position:fixed;bottom:20px;right:20px;width:380px;height:450px;background:rgba(10,10,10,0.95);color:#00ff00;z-index:99999;padding:15px;border-radius:8px;font-family:'Consolas','Monaco',monospace;font-size:12px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.6);border:1px solid #333;";
-        document.body.appendChild(div);
-        return (msg, type='info') => {
-            const p = document.createElement('div');
-            p.style.marginBottom = '4px';
-            p.style.borderBottom = '1px solid #222';
-            p.style.paddingBottom = '2px';
-            p.style.wordBreak = 'break-all';
-            if (type === 'error') p.style.color = '#ff5555';
-            if (type === 'success') p.style.color = '#55ff55';
-            if (type === 'warn') p.style.color = '#ffcc00';
-            if (type === 'debug') p.style.color = '#888888';
-            p.innerText = \`[\${new Date().toLocaleTimeString()}] \${msg}\`;
-            div.appendChild(p);
-            div.scrollTop = div.scrollHeight;
-            console.log(\`[BiliHelper] \${msg}\`);
-        };
-    };
-    const log = createLogger();
+function biMixinKey(orig) {
+  const TAB = [46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52];
+  return TAB.map(n => orig[n]).join('').slice(0, 32);
+}
 
-    // MD5
-    var md5=function(){function e(e,n){var t=(65535&e)+(65535&n);return(e>>16)+(n>>16)+(t>>16)<<16|65535&t}function n(e,n,t,r,o,i){return e=(n&t|~n&r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function t(e,n,t,r,o,i){return e=(n&r|t&~r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function r(e,n,t,r,o,i){return e=(n^t^r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function o(e,n,t,r,o,i){return e=(t^(n|~r))+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function i(i,a){i[a>>5]|=128<<a%32,i[14+(a+64>>>9<<4)]=a;var c,u,s,l,f=1732584193,d=-271733879,h=-1732584194,p=271733878;for(c=0;c<i.length;c+=16)u=f,s=d,l=h,h=p,f=n(f,d,h,p=o(p,f,d,h,i[c+15],21,-660478335),i[c],7,-680876936),h=o(h,p,f,d,i[c+6],10,-42063),d=o(d,h,p,f,i[c+1],15,-1990404162),f=o(f,d,h,p,i[c+8],21,1804603682),h=o(h,p,f,d,i[c+15],6,-40341101),d=r(d,h,p,f,i[c+1],4,-1530992060),f=r(f,d,h,p,i[c+4],11,1272893353),h=r(h,p,f,d,i[c+7],16,-155497632),d=r(d,h,p,f,i[c+10],23,-1094730640),f=r(f,d,h,p,i[c+13],4,681279174),h=r(h,p,f,d,i[c],11,-358537222),d=r(d,h,p,f,i[c+3],16,-722521979),f=r(f,d,h,p,i[c+6],23,76029189),h=r(h,p,f,d,i[c+9],4,-640364487),d=r(d,h,p,f,i[c+12],11,-421815835),f=r(f,d,h,p,i[c+15],16,530742520),h=t(h,p,f,d=r(d,h,p,f,i[c+2],23,-995338651),i[c],6,-198630844),f=t(f,d,h,p,i[c+7],10,1126891415),d=t(d,h,p,f,i[c+14],15,-1416354905),h=t(h,p,f,d,i[c+5],21,-57434055),f=t(f,d,h,p,i[c+12],6,1700485571),d=t(d,h,p,f,i[c+3],10,-1894986606),h=t(h,p,f,d,i[c+10],15,-1051523),f=t(f,d,h,p,i[c+1],21,-2054922799),d=t(d,h,p,f,i[c+8],6,1873313359),h=t(h,p,f,d,i[c+15],10,-30611744),f=t(f,d,h,p,i[c+6],15,-1560198380),d=t(d,h,p,f,i[c+13],21,1309151649),h=t(h,p,f,d,i[c+4],6,-145523070),f=t(f,d,h,p,i[c+11],10,-1120210379),d=t(d,h,p,f,i[c+2],15,718787259),h=e(h,l),p=e(p,u),f=e(f,c),d=e(d,s);return[f,d,h,p]}function a(e){var n,t="";for(n=0;n<32*e.length;n+=8)t+=String.fromCharCode(e[n>>5]>>>n%32&255);return t}function c(e){var n,t=[];for(t[(e.length>>2)-1]=void 0,n=0;n<t.length;n+=1)t[n]=0;for(n=0;n<8*e.length;n+=8)t[n>>5]|=(255&e.charCodeAt(n/8))<<n%32;return t}function u(e){var n,t,r="";for(n=0;n<e.length;n+=1)t=e[n],r+="0123456789abcdef".charAt(t>>4&15)+"0123456789abcdef".charAt(15&t);return r}return function(e){return u(function(e){var n,t=[];for(n=0;n<32*e.length;n+=8)t.push(e[n>>5]>>>n%32&255);return t}(i(c(e),8*e.length)))}}();
+function biEncWbi(params) {
+  const mixin = biMixinKey(BI_KEYS.img_key + BI_KEYS.sub_key);
+  const p = Object.assign({}, params, { wts: Math.round(Date.now() / 1000) });
+  const query = Object.keys(p).sort().map(k => {
+    const v = String(p[k]).replace(/[!'()*]/g, '');
+    return encodeURIComponent(k) + '=' + encodeURIComponent(v);
+  }).join('&');
+  return query + '&w_rid=' + md5(query + mixin);
+}
 
-    // Wbi Sign
-    const MIXIN_KEY_ENC_TAB=[46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52];
-    const getMixinKey = (orig) => MIXIN_KEY_ENC_TAB.map(n => orig[n]).join('').slice(0,32);
-    const getWbiKeys = async () => {
-        const res = await fetch('https://api.bilibili.com/x/web-interface/nav', { credentials: 'include' });
-        const json = await res.json();
-        if(json.code !== 0) throw new Error(\`无法获取 Wbi Keys (Code: \${json.code}), 请确保已在B站登录\`);
-        const img_url = json.data.wbi_img.img_url;
-        const sub_url = json.data.wbi_img.sub_url;
-        return {
-            img_key: img_url.substring(img_url.lastIndexOf('/')+1, img_url.lastIndexOf('.')),
-            sub_key: sub_url.substring(sub_url.lastIndexOf('/')+1, sub_url.lastIndexOf('.'))
-        };
-    };
-    const encWbi = (params, img_key, sub_key) => {
-        const mixin_key = getMixinKey(img_key + sub_key);
-        const curr_time = Math.round(Date.now() / 1000);
-        const chr_filter = /[!'()*]/g;
-        Object.assign(params, { wts: curr_time });
-        const query = Object.keys(params).sort().map(key => {
-            const value = params[key].toString().replace(chr_filter, '');
-            return \`\${encodeURIComponent(key)}=\${encodeURIComponent(value)}\`;
-        }).join('&');
-        const wbi_sign = md5(query + mixin_key);
-        return query + '&w_rid=' + wbi_sign;
-    };
-    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-    const getCookie = (name) => {
-        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        return match ? match[2] : null;
-    };
+function biGetCookie(name) {
+  const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return m ? decodeURIComponent(m[2]) : '';
+}
 
+function biSetCookies(str) {
+  // 将登录接口返回的 Set-Cookie 风格字符串写入当前域
+  str.split(/;\s*/).forEach(part => {
+    const kv = part.trim();
+    if (!kv || kv.toLowerCase().startsWith('expires') || kv.toLowerCase().startsWith('max-age')) return;
+    document.cookie = kv + '; path=/; domain=.bilibili.com; secure; samesite=none';
+  });
+}
+
+function biHasLoginCookies() {
+  return !!biGetCookie('SESSDATA') && !!biGetCookie('bili_jct');
+}
+
+async function biEnsureKeys() {
+  if (!BI_KEYS) await biLoadKeys();
+}
+
+async function biApi(path, params, method) {
+  await biEnsureKeys();
+  const qs = biEncWbi(params || {});
+  const url = BI_API + path + (method === 'POST' ? '' : (path.indexOf('?') >= 0 ? '&' : '?') + qs);
+  const opts = { credentials: 'include', signal: AbortSignal.timeout(15000) };
+  if (method === 'POST') {
+    opts.method = 'POST';
+    opts.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    opts.body = qs + (qs ? '&' : '') + 'csrf=' + biGetCookie('bili_jct');
+  }
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+// ---------- 登录：二维码 ----------
+async function qrNewTicket() {
+  const j = await biApi('/x/passport-login/web/qrcode/generate', {}, 'GET');
+  if (j.code !== 0) throw new Error('获取二维码失败: ' + j.message);
+  return { url: j.data.url, qrcode_key: j.data.qrcode_key };
+}
+async function qrPoll(qrcode_key) {
+  const j = await biApi('/x/passport-login/web/qrcode/poll?qrcode_key=' + encodeURIComponent(qrcode_key) + '&source=main-fe-header', {}, 'GET');
+  const d = j.data || {};
+  return { code: d.code, message: d.message, refresh_token: d.refresh_token, timestamp: d.timestamp };
+}
+function qrImageSrc(url) {
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url);
+}
+
+// ---------- 登录：短信验证码 ----------
+async function smsSend(captcha, tel) {
+  const j = await biApi('/x/passport-login/send_sms', { captcha: captcha, tel: tel, login_status: 0, source: 'main-fe-header', stat: JSON.stringify({ mode: 0, showtype: 0, dmbar: false }), ext: '', risk_with_code: 0, rec_token: '', data: '' }, 'POST');
+  if (j.code !== 0) throw new Error('发送验证码失败(' + j.code + '): ' + j.message);
+  return j.data || {};
+}
+async function smsConfirm(d) {
+  const j = await biApi('/x/passport-login/login/sms', { captcha_response: d.code, cid: d.cid, csrf: biGetCookie('bili_jct'), login_status: 0, media_id: '', recall_token: '', refresh_token: d.refresh_token || '', source: 'main-fe-header', tel: d.tel, token: d.token }, 'POST');
+  if (j.code !== 0) throw new Error('短信登录失败(' + j.code + '): ' + j.message);
+  return j.data || {};
+}
+
+// ---------- 登录：账号密码 ----------
+async function pwdCaptcha() {
+  const j = await biApi('/x/passport-login/captcha?source=main-fe-header&t=' + Date.now(), {}, 'GET');
+  if (j.code !== 0) throw new Error('获取极验失败: ' + j.message);
+  return j.data || {};
+}
+async function pwdLogin(u, p, gee) {
+  // Web端账密登录：密码需 RSA 加密 + 极验。纯前端无法稳定通过时返回错误码，由 UI 兜底跳转官方页。
+  const params = { source: 'main-fe-header', spade_v2: '', gee_helper: (gee && gee.gee_helper) || '', validate: (gee && gee.validate) || '', rec_token_for_risk: '', t: String(Date.now()), username: u, password: p };
+  const j = await biApi('/x/passport-login/web/login', params, 'POST');
+  return { code: j.code, message: j.message, data: j.data };
+}
+
+// ---------- 收藏夹 ----------
+async function fetchFolders(mid) {
+  const j = await biApi('/x/v3/fav/folder/created/list-all?up_mid=' + encodeURIComponent(mid) + '&jsonp=jsonp', {}, 'GET');
+  if (j.code !== 0) throw new Error('获取收藏夹列表失败: ' + j.message);
+  return (j.data && j.data.list) || [];
+}
+
+// ---------- 视频详情 ----------
+async function fetchVideoDetail(bvid, aid) {
+  const params = bvid ? { bvid: bvid } : { aid: aid };
+  const j = await biApi('/x/web-interface/view', params, 'GET');
+  if (j.code !== 0) throw new Error('view失败:' + j.message);
+  const d = j.data;
+  return { aid: d.aid, bvid: d.bvid, title: d.title, author: (d.owner && d.owner.name) || '', play: d.stat ? d.stat.view : 0, fav: d.stat ? d.stat.favorite : 0, like: d.stat ? d.stat.like : 0, duration: d.duration };
+}
+
+// ---------- 搜索候选 ----------
+async function searchCandidates(keyword, page) {
+  const j = await biApi('/x/web-interface/wbi/search/type', { search_type: 'video', keyword: keyword, page: page || 1, page_size: 20 }, 'GET');
+  if (j.code !== 0) throw new Error('搜索API错误(' + j.code + '): ' + j.message);
+  const rs = (j.data && j.data.result) || [];
+  return rs.map(v => ({ aid: v.id || v.aid, bvid: v.bvid, title: (v.title || '').replace(/<[^>]+>/g, ''), author: (v.author || '').replace(/<[^>]+>/g, ''), play: parseInt(String(v.play_num || v.plays || 0).replace(/\D/g, '')) || 0, date: v.pubdate || 0 }));
+}
+
+// ---------- 收藏 ----------
+async function addFavorite(aid, folderId) {
+  const j = await biApi('/x/v3/fav/resource/deal', { rid: aid, type: 2, add_media_ids: String(folderId), del_media_ids: '', platform: 'web', csrf: biGetCookie('bili_jct') }, 'POST');
+  return j;
+}
+
+// ============================================================
+// 筛选 + 候选选择 + 任务执行引擎（内置模式 & 脚本模式共用）
+// ============================================================
+function fmtW(n) { n = Number(n) || 0; return n >= 10000 ? (n / 10000).toFixed(1) + '万' : String(n); }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, Math.max(0, ms | 0))); }
+
+function passesFilter(v, f) {
+  if (f.minPlay && v.play < f.minPlay) return false;
+  if (f.minFav && v.fav < f.minFav) return false;
+  if (f.minLike && v.like < f.minLike) return false;
+  if (f.maxDuration && v.duration > f.maxDuration) return false;
+  if (f.upMatch) {
+    const kw = String(f.upMatch).trim().toLowerCase();
+    if (kw && !String(v.author || '').toLowerCase().includes(kw)) return false;
+  }
+  return true;
+}
+
+function scoreVideo(v, f) {
+  let s = 0;
+  s += Math.log10(1 + (v.play || 0)) * (f.wPlay != null ? f.wPlay : 2.0);
+  s += Math.log10(1 + (v.fav || 0)) * (f.wFav != null ? f.wFav : 2.5);
+  s += Math.log10(1 + (v.like || 0)) * (f.wLike != null ? f.wLike : 1.5);
+  if (f.preferShort && v.duration > 0 && v.duration <= 600) s += 1.5;
+  return s;
+}
+
+function pickBest(cands, videoStats, f) {
+  const pool = cands.map(c => Object.assign({}, c, videoStats[c.aid] || {}));
+  const ok = pool.filter(v => passesFilter(v, f));
+  const use = ok.length ? ok : (f.strict ? [] : pool.filter(v => !f._anyFilter || passesFilter(v, f)));
+  if (!use.length) return null;
+  use.sort((a, b) => scoreVideo(b, f) - scoreVideo(a, f));
+  return use[0];
+}
+
+async function runTask(task, cfg, log, isCancelled) {
+  const term = task.term;
+  const f = cfg.filters || {};
+  let chosen = null;
+  if (task.exact && task.exact.bvid) {
     try {
-        log('🚀 初始化脚本...');
-        log('🔐 获取加密密钥 (Wbi Keys)...');
-        const { img_key, sub_key } = await getWbiKeys();
-        log('✅ 密钥获取成功');
+      const d = await fetchVideoDetail(task.exact.bvid, task.exact.aid);
+      if (!cfg.filtersEnabled || passesFilter(d, f)) chosen = d;
+      else { log('跳过「' + term + '」：精确视频不满足筛选条件', 'warn'); return { status: 'filtered' }; }
+    } catch (e) { log('无法获取视频信息 ' + task.exact.bvid + ': ' + e.message, 'err'); return { status: 'error' }; }
+  } else {
+    const keyword = f.upPrefix && task.author ? (term + ' ' + task.author) : term;
+    const pages = f.searchPages || 1;
+    let cands = [];
+    for (let pg = 1; pg <= pages; pg++) {
+      const rs = await searchCandidates(keyword, pg);
+      cands = cands.concat(rs);
+      if (rs.length < 20) break;
+    }
+    if (!cands.length) { log('未找到结果：' + term, 'warn'); return { status: 'notfound' }; }
+    const videoStats = {};
+    if (cfg.filtersEnabled && (f.minPlay || f.minFav || f.minLike || f.maxDuration || f.upMatch)) {
+      const top = cands.slice(0, f.detailCount || 5);
+      for (const c of top) {
+        try { videoStats[c.aid] = await fetchVideoDetail(c.bvid, c.aid); } catch (e) { }
+        await sleep(cfg.interval / 2);
+      }
+    }
+    chosen = pickBest(cands, videoStats, f);
+    if (!chosen) { log('所有候选均被筛掉：' + term, 'warn'); return { status: 'filtered' }; }
+  }
+  if (isCancelled && isCancelled()) return { status: 'cancelled' };
+  const res = await addFavorite(chosen.aid, cfg.folderId);
+  if (res.code === 0) { log('✅ 「' + term + '」→ [' + chosen.bvid + '] ' + String(chosen.title).slice(0, 24), 'ok'); return { status: 'done', video: chosen }; }
+  if (res.code === 11007 || res.code === 11008 || res.code === 11201) { log('⚠️ 「' + term + '」已在收藏夹中', 'warn'); return { status: 'exists' }; }
+  log('❌ 收藏失败「' + term + '」code=' + res.code + ': ' + res.message, 'err');
+  return { status: 'error' };
+}
 
-        log('📂 获取收藏夹列表...');
-        const csrf = getCookie('bili_jct');
-        if(!csrf) { log('💥 未找到 CSRF Token', 'error'); throw new Error('无法获取 CSRF Token'); }
-        const userId = getCookie('DedeUserID');
-        if(!userId) throw new Error('无法获取 User ID');
+async function executeTasks(tasks, cfg, log, setProgress, isCancelled) {
+  const seen = new Set();
+  const stats = { done: 0, exists: 0, fail: 0, skip: 0, filtered: 0, notfound: 0 };
+  const enabled = tasks.filter(t => t.enabled !== false);
+  for (let i = 0; i < enabled.length; i++) {
+    if (isCancelled && isCancelled()) { log('⏹ 已停止，完成 ' + stats.done + ' 项', 'warn'); break; }
+    const t = enabled[i];
+    log('[' + (i + 1) + '/' + enabled.length + '] 🔍 ' + t.term);
+    try {
+      const r = await runTask(t, cfg, log, isCancelled);
+      if (r.status === 'done') {
+        const key = r.video && r.video.aid;
+        if (cfg.dedupe && seen.has(key)) { log('重复目标已跳过 (aid=' + key + ')', 'debug'); stats.skip++; }
+        else { seen.add(key); stats.done++; }
+      } else if (r.status === 'exists') stats.exists++;
+      else if (r.status === 'filtered') stats.filtered++;
+      else if (r.status === 'notfound') stats.notfound++;
+      else if (r.status === 'cancelled') break;
+      else stats.fail++;
+    } catch (e) { log('异常：' + e.message, 'err'); stats.fail++; }
+    setProgress(i + 1, enabled.length);
+    await sleep(cfg.interval);
+  }
+  log('🎉 任务结束 — 成功:' + stats.done + ' 已存在:' + (stats.exists + stats.skip) + ' 被筛掉:' + stats.filtered + ' 未找到:' + stats.notfound + ' 失败:' + stats.fail, 'ok');
+  return stats;
+}
 
-        const folderRes = await fetch(\`https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=\${userId}&jsonp=jsonp\`, { credentials: 'include' });
-        const folderJson = await folderRes.json();
-        if(folderJson.code !== 0) throw new Error('获取收藏夹失败: ' + folderJson.message);
-        const list = folderJson.data.list;
-        if(!list || list.length === 0) throw new Error('未找到任何收藏夹');
-
-        let msg = "请找到目标收藏夹的【数字ID】，输入下方框中：\\n";
-        list.forEach(f => { msg += \`[\${f.id}] \${f.title} (\${f.media_count}个内容)\\n\`; });
-        const defaultId = list[0] ? list[0].id : '';
-        const targetId = prompt(msg, defaultId);
-        if(!targetId) return log('❌ 用户取消操作', 'warn');
-        const targetFolder = list.find(f => f.id == targetId);
-        log(\`🎯 目标收藏夹 ID: \${targetId} (\${targetFolder ? targetFolder.title : '未知名称'})\`);
-
-        let successCount = 0, failCount = 0;
-        for (let i = 0; i < songList.length; i++) {
-            const term = songList[i];
-            const progressStr = \`[\${i + 1}/\${songList.length}]\`;
-            try {
-                log(\`\${progressStr} 🔍 搜索: \${term}\`);
-                const searchParams = { keyword: term, search_type: 'video', page: 1, page_size: 1 };
-                const query = encWbi(searchParams, img_key, sub_key);
-                const searchRes = await fetch(\`https://api.bilibili.com/x/web-interface/wbi/search/type?\${query}\`, { credentials: 'include' });
-                if (!searchRes.ok) { log(\`\${progressStr} ❌ 网络错误: \${searchRes.status}\`, 'error'); failCount++; await sleep(interval); continue; }
-                const searchJson = await searchRes.json();
-                if (searchJson.code !== 0) { log(\`\${progressStr} ❌ 搜索API错误: \${searchJson.message}\`, 'error'); failCount++; continue; }
-                const results = searchJson.data.result;
-                if (!results || results.length === 0) { log(\`\${progressStr} ⚠️ 未找到结果\`, 'warn'); failCount++; continue; }
-                const video = results[0];
-                const aid = video.id || video.aid;
-                const title = video.title ? video.title.replace(/<[^>]+>/g, "") : "Unknown Title";
-                if (!aid) { console.error('Video Error:', video); log(\`\${progressStr} ❌ 无法解析视频AID\`, 'error'); failCount++; continue; }
-                log(\`\${progressStr} ⏳ 收藏 [AV\${aid}] \${title.slice(0,15)}...\`, 'debug');
-                const addData = new URLSearchParams();
-                addData.append('rid', aid);
-                addData.append('type', '2');
-                addData.append('add_media_ids', targetId);
-                addData.append('csrf', csrf);
-                addData.append('platform', 'web');
-                const addRes = await fetch('https://api.bilibili.com/x/v3/fav/resource/deal', {
-                    method: 'POST',
-                    body: addData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    credentials: 'include'
-                });
-                const addJson = await addRes.json();
-                if(addJson.code === 0) { log(\`\${progressStr} ✅ 成功收藏\`, 'success'); successCount++; }
-                else if (addJson.code === 11007) { log(\`\${progressStr} ⚠️ 已在收藏夹中\`, 'warn'); successCount++; }
-                else { log(\`\${progressStr} ❌ 收藏失败 (Code: \${addJson.code}): \${addJson.message}\`, 'error'); failCount++; }
-            } catch(e) { log(\`\${progressStr} ❌ 异常: \${e.message}\`, 'error'); failCount++; }
-            await sleep(interval);
-        }
-        log(\`🎉 完成! 成功: \${successCount}, 失败: \${failCount}\`, 'success');
-        alert(\`任务完成!\\n成功: \${successCount}\\n失败: \${failCount}\`);
-    } catch(e) { log('💥 致命错误: ' + e.message, 'error'); console.error(e); }
-})();`;
+// ============================================================
+// 浏览器控制台脚本生成器（备用模式，支持筛选与精确链接）
+// 注意: 本函数内部模板使用字符串拼接，避免嵌套反引号问题
+// ============================================================
+function generateBilibiliScript(tasks, opts) {
+  opts = opts || {};
+  const interval = opts.interval || 2000;
+  const filtersJson = JSON.stringify(opts.filters || {});
+  const tasksJson = JSON.stringify((tasks || []).map(t => ({ term: t.term, author: t.author || '', exact: t.exact || null, enabled: t.enabled !== false })));
+  const dedupe = opts.dedupe !== false;
+  const L = []; // lines of generated script
+  L.push('// ============================================================================');
+  L.push('// BiliPlaylist - 自动收藏脚本 (浏览器控制台备用模式)');
+  L.push('// 适用场景: 网页内置模式受 CORS/风控限制时, 在已登录的 bilibili.com 页面按 F12');
+  L.push('// 打开控制台(Console), 粘贴本脚本并回车运行。任务列表/筛选条件已内嵌。');
+  L.push('// ============================================================================');
+  L.push('');
+  L.push('(async function() {');
+  L.push('    var TASKS = ' + tasksJson + ';');
+  L.push('    var FILTERS = ' + filtersJson + '; // minPlay/minFav/minLike/maxDuration/upMatch/strict/searchPages/detailCount/wPlay/wFav/wLike/preferShort/upPrefix');
+  L.push('    var INTERVAL = ' + interval + ';');
+  L.push('    var DEDUPE = ' + dedupe + ';');
+  L.push('');
+  L.push('    var createLogger = function() {');
+  L.push("        var old = document.getElementById('bili-helper-log'); if (old) old.remove();");
+  L.push("        var div = document.createElement('div'); div.id = 'bili-helper-log';");
+  L.push('        div.style = "position:fixed;bottom:20px;right:20px;width:380px;height:450px;background:rgba(10,10,10,0.95);color:#00ff00;z-index:99999;padding:15px;border-radius:8px;font-family:Consolas,Monaco,monospace;font-size:12px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.6);border:1px solid #333;";');
+  L.push('        document.body.appendChild(div);');
+  L.push("        return function(msg, type) { type = type || 'info';");
+  L.push("            var p = document.createElement('div'); p.style.marginBottom='4px'; p.style.borderBottom='1px solid #222'; p.style.paddingBottom='2px'; p.style.wordBreak='break-all';");
+  L.push("            if (type === 'error') p.style.color = '#ff5555'; if (type === 'success') p.style.color = '#55ff55';");
+  L.push("            if (type === 'warn') p.style.color = '#ffcc00'; if (type === 'debug') p.style.color = '#888888';");
+  L.push("            p.innerText = '[' + new Date().toLocaleTimeString() + '] ' + msg;");
+  L.push('            div.appendChild(p); div.scrollTop = div.scrollHeight; console.log("[BiliHelper] " + msg); };');
+  L.push('    };');
+  L.push('    var log = createLogger();');
+  L.push('');
+  L.push('    // MD5 (for Wbi signature)');
+  L.push('var md5=function(){function e(e,n){var t=(65535&e)+(65535&n);return(e>>16)+(n>>16)+(t>>16)<<16|65535&t}function n(e,n,t,r,o,i){return e=(n&t|~n&r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function t(e,n,t,r,o,i){return e=(n&r|t&~r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function r(e,n,t,r,o,i){return e=(n^t^r)+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function o(e,n,t,r,o,i){return e=(t^(n|~r))+e+o+i,e=(e<<(i=e)|e>>>32-i)+n}function i(i,a){i[a>>5]|=128<<a%32,i[14+(a+64>>>9<<4)]=a;var c,u,s,l,f=1732584193,d=-271733879,h=-1732584194,p=271733878;for(c=0;c<i.length;c+=16)u=f,s=d,l=h,h=p,f=n(f,d,h,p=o(p,f,d,h,i[c+15],21,-660478335),i[c],7,-680876936),h=o(h,p,f,d,i[c+6],10,-42063),d=o(d,h,p,f,i[c+1],15,-1990404162),f=o(f,d,h,p,i[c+8],21,1804603682),h=o(h,p,f,d,i[c+15],6,-40341101),d=r(d,h,p,f,i[c+1],4,-1530992060),f=r(f,d,h,p,i[c+4],11,1272893353),h=r(h,p,f,d,i[c+7],16,-155497632),d=r(d,h,p,f,i[c+10],23,-1094730640),f=r(f,d,h,p,i[c+13],4,681279174),h=r(h,p,f,d,i[c],11,-358537222),d=r(d,h,p,f,i[c+3],16,-722521979),f=r(f,d,h,p,i[c+6],23,76029189),h=r(h,p,f,d,i[c+9],4,-640364487),d=r(d,h,p,f,i[c+12],11,-421815835),f=r(f,d,h,p,i[c+15],16,530742520),h=t(h,p,f,d=r(d,h,p,f,i[c+2],23,-995338651),i[c],6,-198630844),f=t(f,d,h,p,i[c+7],10,1126891415),d=t(d,h,p,f,i[c+14],15,-1416354905),h=t(h,p,f,d,i[c+5],21,-57434055),f=t(f,d,h,p,i[c+12],6,1700485571),d=t(d,h,p,f,i[c+3],10,-1894986606),h=t(h,p,f,d,i[c+10],15,-1051523),f=t(f,d,h,p,i[c+1],21,-2054922799),d=t(d,h,p,f,i[c+8],6,1873313359),h=t(h,p,f,d,i[c+15],10,-30611744),f=t(f,d,h,p,i[c+6],15,-1560198380),d=t(d,h,p,f,i[c+13],21,1309151649),h=t(h,p,f,d,i[c+4],6,-145523070),f=t(f,d,h,p,i[c+11],10,-1120210379),d=t(d,h,p,f,i[c+2],15,718787259),h=e(h,l),p=e(p,u),f=e(f,c),d=e(d,s);return[f,d,h,p]}function a(e){var n,t="";for(n=0;n<32*e.length;n+=8)t+=String.fromCharCode(e[n>>5]>>>n%32&255);return t}function c(e){var n,t=[];for(t[(e.length>>2)-1]=void 0,n=0;n<t.length;n+=1)t[n]=0;for(n=0;n<8*e.length;n+=8)t[n>>5]|=(255&e.charCodeAt(n/8))<<n%32;return t}function u(e){var n,t,r="";for(n=0;n<e.length;n+=1)t=e[n],r+="0123456789abcdef".charAt(t>>4&15)+"0123456789abcdef".charAt(15&t);return r}return function(e){return u(function(e){var n,t=[];for(n=0;n<32*e.length;n+=8)t.push(e[n>>5]>>>n%32&255);return t}(i(c(e),8*e.length)))}}();');
+  L.push('');
+  L.push('    var MIXIN_KEY_ENC_TAB=[46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52];');
+  L.push("    var getMixinKey = function(orig) { return MIXIN_KEY_ENC_TAB.map(function(n){return orig[n];}).join('').slice(0,32); };");
+  L.push('    var getWbiKeys = async function() {');
+  L.push("        var res = await fetch('https://api.bilibili.com/x/web-interface/nav', { credentials: 'include' });");
+  L.push('        var json = await res.json();');
+  L.push("        if (json.code !== 0) throw new Error('无法获取 Wbi Keys (Code: ' + json.code + '), 请确保已在B站登录');");
+  L.push('        var iu = json.data.wbi_img.img_url, su = json.data.wbi_img.sub_url;');
+  L.push("        return { img_key: iu.substring(iu.lastIndexOf('/')+1, iu.lastIndexOf('.')), sub_key: su.substring(su.lastIndexOf('/')+1, su.lastIndexOf('.')) };");
+  L.push('    };');
+  L.push('    var encWbi = function(params, img_key, sub_key) {');
+  L.push('        var mixin_key = getMixinKey(img_key + sub_key);');
+  L.push('        params = Object.assign({}, params, { wts: Math.round(Date.now()/1000) });');
+  L.push("        var query = Object.keys(params).sort().map(function(key) {");
+  L.push("            var value = String(params[key]).replace(/[!'()*]/g, '');");
+  L.push('            return encodeURIComponent(key) + "=" + encodeURIComponent(value);');
+  L.push("        }).join('&');");
+  L.push("        return query + '&w_rid=' + md5(query + mixin_key);");
+  L.push('    };');
+  L.push('    var sleep = function(ms) { return new Promise(function(r){ setTimeout(r, ms); }); };');
+  L.push("    var getCookie = function(name) { var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)')); return m ? m[2] : null; };");
+  L.push('');
+  L.push('    function passesFilter(v, f) {');
+  L.push('        if (f.minPlay && v.play < f.minPlay) return false;');
+  L.push('        if (f.minFav && v.fav < f.minFav) return false;');
+  L.push('        if (f.minLike && v.like < f.minLike) return false;');
+  L.push('        if (f.maxDuration && v.duration > f.maxDuration) return false;');
+  L.push('        if (f.upMatch) { var kw = String(f.upMatch).trim().toLowerCase(); if (kw && String(v.author||"").toLowerCase().indexOf(kw) < 0) return false; }');
+  L.push('        return true;');
+  L.push('    }');
+  L.push('    function scoreVideo(v, f) {');
+  L.push('        var s = 0;');
+  L.push('        s += Math.log10(1 + (v.play||0)) * (f.wPlay != null ? f.wPlay : 2.0);');
+  L.push('        s += Math.log10(1 + (v.fav||0)) * (f.wFav != null ? f.wFav : 2.5);');
+  L.push('        s += Math.log10(1 + (v.like||0)) * (f.wLike != null ? f.wLike : 1.5);');
+  L.push('        if (f.preferShort && v.duration > 0 && v.duration <= 600) s += 1.5;');
+  L.push('        return s;');
+  L.push('    }');
+  L.push('');
+  L.push('    try {');
+  L.push("        log('🚀 初始化脚本...');");
+  L.push('        var keys = await getWbiKeys();');
+  L.push("        log('✅ Wbi 密钥获取成功');");
+  L.push("        var csrf = getCookie('bili_jct');");
+  L.push("        if (!csrf) { log('💥 未找到 CSRF Token (请先登录)', 'error'); return; }");
+  L.push("        var userId = getCookie('DedeUserID');");
+  L.push("        if (!userId) { log('💥 无法获取 User ID (请先登录)', 'error'); return; }");
+  L.push('');
+  L.push("        log('📂 获取收藏夹列表...');");
+  L.push("        var folderRes = await fetch('https://api.bilibili.com/x/v3/fav/folder/created/list-all?up_mid=' + userId + '&jsonp=jsonp', { credentials: 'include' });");
+  L.push('        var folderJson = await folderRes.json();');
+  L.push("        if (folderJson.code !== 0) throw new Error('获取收藏夹失败: ' + folderJson.message);");
+  L.push('        var list = folderJson.data.list || [];');
+  L.push("        if (!list.length) throw new Error('未找到任何收藏夹');");
+  L.push("        var msg = '请找到目标收藏夹的【数字ID】，输入下方框中：\\n';");
+  L.push("        list.forEach(function(f){ msg += '[' + f.id + '] ' + f.title + ' (' + f.media_count + '个内容)\\n'; });");
+  L.push("        var targetId = prompt(msg, list[0] ? list[0].id : '');");
+  L.push("        if (!targetId) { log('❌ 用户取消操作', 'warn'); return; }");
+  L.push("        var tf = list.find(function(f){ return String(f.id) === String(targetId); });");
+  L.push("        log('🎯 目标收藏夹: [' + targetId + '] ' + (tf ? tf.title : '未知名称'));");
+  L.push('');
+  L.push('        async function viewStat(bvid, aid) {');
+  L.push("            var u = bvid ? ('https://api.bilibili.com/x/web-interface/view?bvid=' + bvid) : ('https://api.bilibili.com/x/web-interface/view?aid=' + aid);");
+  L.push("            var j = await (await fetch(u, { credentials: 'include' })).json();");
+  L.push("            if (j.code !== 0) throw new Error(j.message);");
+  L.push("            var d = j.data; return { aid: d.aid, bvid: d.bvid, title: d.title, author: (d.owner && d.owner.name) || '', play: d.stat.view, fav: d.stat.favorite, like: d.stat.like, duration: d.duration };");
+  L.push('        }');
+  L.push('');
+  L.push('        var successCount = 0, existCount = 0, filteredCount = 0, failCount = 0;');
+  L.push('        var seen = {};');
+  L.push("        var todo = TASKS.filter(function(t){ return t.enabled !== false; });");
+  L.push('        for (var i = 0; i < todo.length; i++) {');
+  L.push('            var t = todo[i];');
+  L.push("            var P = '[' + (i+1) + '/' + todo.length + ']';");
+  L.push('            try {');
+  L.push("                log(P + ' 🔍 处理: ' + t.term);");
+  L.push('                var chosen = null;');
+  L.push('                if (t.exact && t.exact.bvid) {');
+  L.push('                    chosen = await viewStat(t.exact.bvid, t.exact.aid);');
+  L.push('                    if (Object.keys(FILTERS).length && !passesFilter(chosen, FILTERS)) { log(P + \' ⚠️ 精确视频不满足筛选，跳过\', \'warn\'); filteredCount++; continue; }');
+  L.push('                } else {');
+  L.push("                    var keyword = (FILTERS.upPrefix && t.author) ? (t.term + ' ' + t.author) : t.term;");
+  L.push('                    var pages = FILTERS.searchPages || 1;');
+  L.push('                    var results = [];');
+  L.push('                    for (var pg = 1; pg <= pages; pg++) {');
+  L.push("                        var q = encWbi({ keyword: keyword, search_type: 'video', page: pg, page_size: 20 }, keys.img_key, keys.sub_key);");
+  L.push("                        var sj = await (await fetch('https://api.bilibili.com/x/web-interface/wbi/search/type?' + q, { credentials: 'include' })).json();");
+  L.push("                        if (sj.code !== 0) { log(P + ' ❌ 搜索API错误: ' + sj.message, 'error'); break; }");
+  L.push('                        var rs = (sj.data && sj.data.result) || [];');
+  L.push("                        rs.forEach(function(v){ results.push({ aid: v.id || v.aid, bvid: v.bvid, title: (v.title||'').replace(/<[^>]+>/g,''), author: (v.author||'').replace(/<[^>]+>/g,''), play: parseInt(String(v.play_num||v.plays||0).replace(/\\D/g,''))||0 }); });");
+  L.push('                        if (rs.length < 20) break;');
+  L.push('                        await sleep(INTERVAL/2);');
+  L.push('                    }');
+  L.push("                    if (!results.length) { log(P + ' ⚠️ 未找到结果', 'warn'); failCount++; await sleep(INTERVAL); continue; }");
+  L.push('                    var pool = results;');
+  L.push('                    var needStat = FILTERS.minPlay || FILTERS.minFav || FILTERS.minLike || FILTERS.maxDuration || FILTERS.upMatch;');
+  L.push('                    if (needStat) {');
+  L.push('                        var statMap = {};');
+  L.push('                        var topN = pool.slice(0, FILTERS.detailCount || 5);');
+  L.push('                        for (var k = 0; k < topN.length; k++) {');
+  L.push('                            try { statMap[topN[k].aid] = await viewStat(topN[k].bvid, topN[k].aid); } catch(e) {}');
+  L.push('                            await sleep(INTERVAL/2);');
+  L.push('                        }');
+  L.push('                        pool = pool.map(function(c){ var m = statMap[c.aid] || {}; var o = {}; for (var kk in c) o[kk]=c[kk]; for (var kk2 in m) o[kk2]=m[kk2]; return o; });');
+  L.push('                        var ok = pool.filter(function(v){ return passesFilter(v, FILTERS); });');
+  L.push("                        if (!ok.length) { log(P + ' ⚠️ 候选全部被筛掉', 'warn'); filteredCount++; await sleep(INTERVAL); continue; }");
+  L.push('                        pool = ok;');
+  L.push('                    }');
+  L.push('                    pool.sort(function(a,b){ return scoreVideo(b, FILTERS) - scoreVideo(a, FILTERS); });');
+  L.push('                    chosen = pool[0];');
+  L.push('                }');
+  L.push("                if (!chosen || !chosen.aid) { log(P + ' ❌ 无法解析视频AID', 'error'); failCount++; continue; }");
+  L.push("                if (DEDUPE && seen[chosen.aid]) { log(P + ' ⏭ 本次任务内重复目标，跳过', 'debug'); existCount++; await sleep(INTERVAL); continue; }");
+  L.push('                seen[chosen.aid] = 1;');
+  L.push("                log(P + ' ⏳ 收藏 [' + chosen.bvid + '] ' + String(chosen.title).slice(0,15) + '...', 'debug');");
+  L.push('                var addData = new URLSearchParams();');
+  L.push("                addData.append('rid', chosen.aid); addData.append('type', '2');");
+  L.push("                addData.append('add_media_ids', targetId); addData.append('csrf', csrf); addData.append('platform', 'web');");
+  L.push("                var addJson = await (await fetch('https://api.bilibili.com/x/v3/fav/resource/deal', { method: 'POST', body: addData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, credentials: 'include' })).json();");
+  L.push("                if (addJson.code === 0) { log(P + ' ✅ 成功收藏', 'success'); successCount++; }");
+  L.push("                else if ([11007,11008,11201].indexOf(addJson.code) >= 0) { log(P + ' ⚠️ 已在收藏夹中', 'warn'); existCount++; }");
+  L.push("                else { log(P + ' ❌ 收藏失败 (Code: ' + addJson.code + '): ' + addJson.message, 'error'); failCount++; }");
+  L.push("            } catch(e) { log(P + ' ❌ 异常: ' + e.message, 'error'); failCount++; }");
+  L.push('            await sleep(INTERVAL);');
+  L.push('        }');
+  L.push("        log('🎉 完成! 成功: ' + successCount + ', 已存在: ' + existCount + ', 被筛掉: ' + filteredCount + ', 失败: ' + failCount, 'success');");
+  L.push("        alert('任务完成!\\n成功: ' + successCount + '\\n已存在: ' + existCount + '\\n被筛掉: ' + filteredCount + '\\n失败: ' + failCount);");
+  L.push("    } catch(e) { log('💥 致命错误: ' + e.message, 'error'); console.error(e); }");
+  L.push('})();');
+  return L.join('\n');
 }
 
 // ============================================================
 // App State
 // ============================================================
+const STATUS = { IDLE: 'idle', FETCHING: 'fetching', SUCCESS: 'success', ERROR: 'error', RUNNING: 'running', DONE: 'done' };
 const state = {
-  songs: [],
+  step: 1,                    // 1 导入 2 筛选任务 3 登录与目标 4 一键执行
+  mode: 'url',                // url | txt
+  urlInput: '',
   rawText: '',
+  tasks: [],                  // {term, author, exact:{bvid,aid}|null, enabled}
+  sourceName: '',
   status: STATUS.IDLE,
   errorMsg: '',
-  showScript: false,
+  filtersEnabled: true,
+  filters: { minPlay: 0, minFav: 0, minLike: 0, maxDuration: 0, upMatch: '', strict: false, searchPages: 1, detailCount: 5, wPlay: 2.0, wFav: 2.5, wLike: 1.5, preferShort: false, upPrefix: false },
   interval: 2000,
+  dedupe: true,
+  loginTab: 'qr',             // qr | sms | pwd | cookie
+  login: { qrcode_key: '', qrUrl: '', qrStatus: '', note: '', noteOk: false, noteErr: false },
+  user: null,                 // {mid, name}
+  folders: [], foldersLoading: false, folderErr: '',
+  folderId: '',
+  logs: [],
+  progress: { done: 0, total: 0 },
+  stats: null,
+  cancelled: false,
+  showScript: false,
 };
 
-// ============================================================
-// DOM References
-// ============================================================
 const $ = (sel) => document.querySelector(sel);
-const app = $('#app');
+let appEl = null;
+
+function addLog(msg, type) {
+  state.logs.push({ t: new Date().toLocaleTimeString(), msg: msg, type: type || 'info' });
+  if (state.logs.length > 400) state.logs.shift();
+  const el = $('#run-log');
+  if (el) { el.innerHTML = renderLogLines(); el.scrollTop = el.scrollHeight; }
+}
+
+// 从 localStorage 恢复上次 Cookie（凭证有效期约一年）
+function restoreCookie() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('bp_cookie') || 'null');
+    if (!saved || !saved.sessdata) return;
+    if (saved.exp && Date.now() > saved.exp) { localStorage.removeItem('bp_cookie'); return; }
+    if (saved.sessdata) document.cookie = 'SESSDATA=' + encodeURIComponent(saved.sessdata) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+    if (saved.jct) document.cookie = 'bili_jct=' + encodeURIComponent(saved.jct) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+    if (saved.uid) document.cookie = 'DedeUserID=' + encodeURIComponent(saved.uid) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+  } catch (e) { }
+}
+
+function saveCookie(info) {
+  try { localStorage.setItem('bp_cookie', JSON.stringify(Object.assign({ exp: Date.now() + 300 * 86400000 }, info))); } catch (e) { }
+}
+
+async function checkLogin() {
+  const j = await fetchJsonAuto(BI_API + '/x/web-interface/nav');
+  if (j.data && j.data.isLogin) {
+    state.user = { mid: String(j.data.mid), name: j.data.uname };
+    BI_KEYS = null; // 登录后重新获取 WBI 密钥
+    return true;
+  }
+  state.user = null;
+  return false;
+}
 
 // ============================================================
-// Render
+// Render — Wizard
 // ============================================================
-function render() {
-  app.innerHTML = renderApp();
-  bindEvents();
+function render() { appEl.innerHTML = renderApp(); bindEvents(); }
+
+function renderStepsBar() {
+  const steps = ['① 导入歌单', '② 筛选与设置', '③ 登录 & 收藏夹', '④ 一键执行'];
+  return '<div class="steps-bar">' + steps.map((s, i) => {
+    const n = i + 1;
+    const cls = state.step === n ? 'active' : (state.step > n ? 'done' : '');
+    return `<span class="step-chip ${cls}">${state.step > n ? icons.check : ''}${s}</span>`;
+  }).join('') + '</div>';
 }
 
 function renderApp() {
   return `
-    <!-- Header -->
     <header class="header">
       <div class="header-inner">
         <div class="header-left">
           <div class="logo-icon">${icons.music}</div>
           <span class="logo-text">BiliPlaylist</span>
         </div>
-        <div class="header-badge">${icons.refresh} 纯离线 · 无需 API</div>
+        <div class="header-badge">${icons.refresh} 粘贴链接 · 一键收藏</div>
       </div>
     </header>
-
-    <!-- Main -->
-    <div class="main">
-      <!-- Left Column -->
-      <div class="left-col">
-        ${renderUploadZone()}
-        ${state.status === STATUS.ERROR ? renderError() : ''}
-        ${state.songs.length > 0 ? renderSongList() : ''}
-      </div>
-
-      <!-- Right Column -->
-      <div class="${state.showScript ? '' : 'script-panel blurred'}">
-        ${state.showScript ? renderScriptPanel() : renderEmptyScript()}
+    <div class="main" style="grid-template-columns:1fr;max-width:960px">
+      <div>
+        ${renderStepsBar()}
+        ${state.step === 1 ? renderStep1() : ''}
+        ${state.step === 2 ? renderStep2() : ''}
+        ${state.step === 3 ? renderStep3() : ''}
+        ${state.step === 4 ? renderStep4() : ''}
       </div>
     </div>
   `;
 }
 
-function renderUploadZone() {
-  const isParsing = state.status === STATUS.PARSING;
+// ---------- Step 1: 导入 ----------
+function renderStep1() {
+  const fetching = state.status === STATUS.FETCHING;
   return `
-    <div class="upload-zone ${isParsing ? 'parsing' : ''}" id="upload-zone">
-      <input type="file" id="file-input" accept=".txt,.md,.csv" style="display:none" />
-      ${isParsing ? `
-        <div class="spinner"></div>
-        <span style="color:var(--pink);font-weight:500">正在本地解析...</span>
+    <div class="panel-card">
+      <div class="panel-title">${icons.link} 导入歌单（支持直接粘贴 B 站链接）</div>
+      <div class="login-tabs">
+        <span class="login-tab ${state.mode === 'url' ? 'active' : ''}" data-mode="url">🔗 歌单链接</span>
+        <span class="login-tab ${state.mode === 'txt' ? 'active' : ''}" data-mode="txt">📄 TXT 文本</span>
+      </div>
+      ${state.mode === 'url' ? `
+        <label class="field-label">粘贴复制的歌单/收藏夹链接，自动识别解析（无需手动提取ID）</label>
+        <div class="input-row">
+          <input class="text-input" id="url-input" placeholder="https://www.bilibili.com/medialist/jump/mlxxxxxxx 或 bilibili.com/video/BV...?fid=xxx 或 b23.tv 短链" value="${escapeHtml(state.urlInput)}" />
+          <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-fetch" ${fetching ? 'disabled' : ''}>${fetching ? '识别中...' : '识别歌单'}</button>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:10px">支持：歌单页(/medialist/、/list/ML)、收藏夹(?fid=)、UP主空间页、b23.tv 短链。直连失败时自动切换 CORS 代理通道。</p>
       ` : `
-        ${icons.upload}
-        <h3>上传歌单 TXT 文件</h3>
-        <p>本地模式 — 自动清理格式</p>
+        <label class="field-label">粘贴或上传歌单文本（每行一首「歌曲 - 歌手」，自动清洗格式）</label>
+        <textarea class="text-input" id="txt-input" placeholder="夜曲 - 周杰伦&#10;晴天 - 周杰伦&#10;...">${escapeHtml(state.rawText)}</textarea>
+        <div class="input-row">
+          <button class="btn-secondary" id="btn-upload">${icons.upload} 上传TXT文件</button>
+          <input type="file" id="file-input" accept=".txt,.md,.csv" style="display:none" />
+          <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-parse-txt">解析文本</button>
+        </div>
+      `}
+      ${state.status === STATUS.ERROR ? renderError() : ''}
+      ${state.tasks.length > 0 ? `
+        <div style="margin-top:16px;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:var(--green);font-size:14px">${icons.check} 已导入 ${state.tasks.filter(t=>t.enabled!==false).length}/${state.tasks.length} 项任务${state.sourceName ? '（来源: ' + escapeHtml(state.sourceName) + '）' : ''}</span>
+          <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-next2">下一步 →</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// ---------- Step 2: 筛选与任务列表 ----------
+function renderStep2() {
+  const f = state.filters;
+  return `
+    <div class="panel-card">
+      <div class="panel-title">${icons.settings} 搜索筛选设置（对「搜索匹配」生效）</div>
+      <label class="check-line"><input type="checkbox" id="f-enabled" ${state.filtersEnabled ? 'checked' : ''}/> 启用筛选（关闭则取搜索结果第一条）</label>
+      <div class="form-grid">
+        <div><label class="field-label">最低播放量</label><input class="text-input" id="f-minplay" type="number" min="0" value="${f.minPlay}" placeholder="如 10000"/></div>
+        <div><label class="field-label">最低收藏数</label><input class="text-input" id="f-minfav" type="number" min="0" value="${f.minFav}" placeholder="如 500"/></div>
+        <div><label class="field-label">最低点赞数</label><input class="text-input" id="f-minlike" type="number" min="0" value="${f.minLike}"/></div>
+        <div><label class="field-label">时长上限(秒, 0=不限)</label><input class="text-input" id="f-maxdur" type="number" min="0" value="${f.maxDuration}"/></div>
+        <div><label class="field-label">UP主名称须包含(可空)</label><input class="text-input" id="f-upmatch" value="${escapeHtml(f.upMatch)}" placeholder="如 音源组"/></div>
+        <div><label class="field-label">搜索候选深度</label><select class="text-input" id="f-pages"><option value="1" ${f.searchPages==1?'selected':''}>1页(20条)</option><option value="2" ${f.searchPages==2?'selected':''}>2页</option><option value="3" ${f.searchPages==3?'selected':''}>3页</option></select></div>
+        <div><label class="field-label">查详情候选数</label><select class="text-input" id="f-detail"><option value="3" ${f.detailCount==3?'selected':''}>前3个</option><option value="5" ${f.detailCount==5?'selected':''}>前5个</option><option value="8" ${f.detailCount==8?'selected':''}>前8个</option></select></div>
+        <div><label class="field-label">全部被筛掉时</label><select class="text-input" id="f-strict"><option value="0" ${!f.strict?'selected':''}>跳过该歌曲</option><option value="1" ${f.strict?'selected':''}>仍收藏第一项</option></select></div>
+      </div>
+      <label class="check-line"><input type="checkbox" id="f-short" ${f.preferShort ? 'checked' : ''}/> 偏好短视频（≤10分钟加分）</label>
+      <label class="check-line"><input type="checkbox" id="f-prefix" ${f.upPrefix ? 'checked' : ''}/> 搜索词附带歌手名（TXT模式更精准但可能漏搜）</label>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:10px">排序权重：收藏×${f.wFav} + 播放×${f.wPlay} + 点赞×${f.wLike}（在满足筛选的候选中选最优）。来自歌单链接的条目会精确锁定原 BV 号，不受搜索影响。</p>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">${icons.music} 任务列表（取消勾选可跳过）</div>
+      <div class="song-list" style="max-height:420px">
+        ${state.tasks.map((t, i) => `
+          <div class="song-item">
+            <input type="checkbox" data-i="${i}" class="task-enable" ${t.enabled !== false ? 'checked' : ''} style="accent-color:var(--pink)" />
+            ${t.exact ? '<span title="精确视频(歌单原文)" style="color:var(--green);font-size:11px;flex-shrink:0">BV</span>' : icons.music}
+            <input type="text" value="${escapeHtml(t.term)}" data-i="${i}" class="task-term" />
+            <span style="font-size:11px;color:var(--text-muted);flex-shrink:0">${escapeHtml(t.author || '')}</span>
+            <button class="btn-remove" data-i="${i}" title="删除">${icons.x}</button>
+          </div>`).join('')}
+      </div>
+      <div class="input-row" style="justify-content:space-between">
+        <button class="btn-secondary" id="btn-back1">← 上一步</button>
+        <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-next3">下一步：登录 →</button>
+      </div>
+    </div>
+  `;
+}
+
+// ---------- Step 3: 登录 + 收藏夹 ----------
+function renderStep3() {
+  return `
+    <div class="panel-card">
+      <div class="panel-title">${icons.login} 登录 Bilibili 账号</div>
+      ${state.user ? `
+        <div class="login-status ok" style="text-align:left">✅ 已登录：${escapeHtml(state.user.name)} (UID ${escapeHtml(state.user.mid)})　<a href="javascript:void(0)" id="btn-logout" style="color:var(--red)">退出</a></div>
+      ` : `
+        <div class="login-tabs">
+          <span class="login-tab ${state.loginTab==='qr'?'active':''}" data-lt="qr">扫码登录</span>
+          <span class="login-tab ${state.loginTab==='sms'?'active':''}" data-lt="sms">手机验证码</span>
+          <span class="login-tab ${state.loginTab==='pwd'?'active':''}" data-lt="pwd">账号密码</span>
+          <span class="login-tab ${state.loginTab==='cookie'?'active':''}" data-lt="cookie">Cookie 注入</span>
+        </div>
+        ${renderLoginBody()}
       `}
     </div>
+    ${state.user ? renderFolderPicker() : ''}
+    ${state.user && state.folderId ? `
+      <div class="input-row" style="justify-content:space-between">
+        <button class="btn-secondary" id="btn-back2">← 上一步</button>
+        <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-next4">下一步：开始执行 →</button>
+      </div>` : ''}
   `;
 }
 
-function renderError() {
-  return `
-    <div class="alert-error">
-      ${icons.alertTriangle}
-      <span>${escapeHtml(state.errorMsg)}</span>
-    </div>
-  `;
-}
-
-function renderSongList() {
-  return `
-    <div class="song-card">
-      <div class="song-card-header">
-        <div class="song-card-header-left">
-          ${icons.check}
-          <span class="song-count">已识别 ${state.songs.length} 首歌曲</span>
+function renderLoginBody() {
+  const L = state.loginTab;
+  if (L === 'qr') {
+    return `
+      <div style="text-align:center">
+        <div class="qr-frame" id="qr-frame">
+          ${state.login.qrUrl ? `<img src="${escapeHtml(qrImageSrc(state.login.qrUrl))}" alt="QR"/>` : '<span style="color:#666;font-size:13px">点击下方按钮获取二维码</span>'}
+          ${state.login.qrStatus === 'expired' ? '<div class="qr-overlay">二维码已过期<br/>请点击刷新</div>' : ''}
+          ${state.login.qrStatus === 'scanned' ? '<div class="qr-overlay">已扫码 ✅<br/>请在手机上点击确认登录</div>' : ''}
         </div>
-        <button class="btn-clear" id="btn-clear">清空</button>
+        <div class="login-status ${state.login.qrStatus==='ok'?'ok':(state.login.qrStatus==='err'?'err':'')}">${escapeHtml(state.login.note || '使用哔哩哔哩App扫码 · 确认后点下方按钮检查登录状态')}</div>
+        <div style="margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn-secondary" id="btn-qr-refresh">${icons.refresh} 获取/刷新二维码</button>
+          <button class="btn-secondary" id="btn-check-login">我已确认，检查登录</button>
+        </div>
+        <div class="hint-box">⚠️ 说明：出于浏览器安全限制，若本页不在 *.bilibili.com 域下运行，扫码接口下发的登录 Cookie 可能无法写入浏览器。此时请改用「Cookie 注入」方式，或将本页部署到 bilibili.com 子域名。</div>
+      </div>`;
+  }
+  if (L === 'sms') {
+    return `
+      <label class="field-label">手机号</label>
+      <input class="text-input" id="sms-tel" placeholder="11位手机号" />
+      <div class="input-row">
+        <input class="text-input" id="sms-code" placeholder="短信验证码" style="flex:1" />
+        <button class="btn-secondary" id="btn-sms-send">发送验证码</button>
       </div>
-      <div class="song-list">
-        ${state.songs.map((song, i) => `
-          <div class="song-item" data-index="${i}">
-            ${icons.music}
-            <input type="text" value="${escapeHtml(song)}" data-index="${i}" class="song-input" />
-            <button class="btn-remove" data-index="${i}" title="删除">
-              ${icons.x}
-            </button>
-          </div>
-        `).join('')}
-      </div>
-      <div class="song-card-footer">
-        <button class="btn-primary" id="btn-generate">
-          ${icons.terminal}
-          生成全自动脚本
-        </button>
-      </div>
+      <div style="margin-top:10px"><button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-sms-login">验证并登录</button></div>
+      <div class="login-status ${state.login.noteOk ? 'ok' : (state.login.noteErr ? 'err' : '')}">${escapeHtml(state.login.note || '')}</div>
+      <div class="hint-box">B 站短信通道带极验风控，纯前端可能被拦截；若发送失败会自动打开官方登录页兜底（登录成功后回本页点「检查登录」即可同步状态）。</div>`;
+  }
+  if (L === 'pwd') {
+    return `
+      <label class="field-label">账号 (邮箱/手机号/用户ID)</label>
+      <input class="text-input" id="pwd-user" autocomplete="username" />
+      <label class="field-label" style="margin-top:10px">密码</label>
+      <input class="text-input" id="pwd-pass" type="password" autocomplete="current-password" />
+      <div style="margin-top:12px"><button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-pwd-login">登录</button></div>
+      <div class="login-status ${state.login.noteOk ? 'ok' : (state.login.noteErr ? 'err' : '')}">${escapeHtml(state.login.note || '')}</div>
+      <div class="hint-box">当前 Web 端账密登录强制极验(gee)人机验证且密码需 RSA 加密，纯前端难以稳定通过。若返回极验/风控错误将自动跳转官方登录页完成登录，再回本页点「检查登录」同步状态。</div>`;
+  }
+  // cookie
+  return `
+    <label class="field-label">粘贴 SESSDATA 值（推荐），或完整 Cookie 串</label>
+    <textarea class="text-input cookie-ta" id="ck-input" placeholder="SESSDATA=xxx; bili_jct=yyy; DedeUserID=zzz&#10;（或直接只粘贴 SESSDATA 的值）"></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-ck-save">保存并验证</button>
+      <a class="btn-secondary" style="text-decoration:none" href="https://www.bilibili.com" target="_blank">${icons.externalLink} 去B站获取Cookie</a>
     </div>
+    <div class="login-status ${state.login.noteOk ? 'ok' : (state.login.noteErr ? 'err' : '')}">${escapeHtml(state.login.note || '')}</div>
+    <div class="hint-box">获取方法：在<b>已登录</b>的 B 站页面按 F12 → Network(网络) → 刷新 → 任意请求的 Request Headers 中复制 Cookie 里的 <code>SESSDATA</code>（连同 bili_jct、DedeUserID 一起粘贴最稳妥）。凭证仅保存在本机 localStorage。</div>`;
+}
+
+function renderFolderPicker() {
+  return `
+    <div class="panel-card">
+      <div class="panel-title">${icons.folder} 选择目标收藏夹
+        <button class="btn-secondary" style="padding:4px 12px;font-size:12px;margin-left:auto" id="btn-load-folders">${icons.refresh} ${state.folders.length ? '刷新' : '加载'}收藏夹</button>
+      </div>
+      ${state.foldersLoading ? '<p style="color:var(--text-muted);font-size:13px">加载中...</p>' : ''}
+      ${state.folderErr ? `<div class="alert-error">${icons.alertTriangle}<span>${escapeHtml(state.folderErr)}</span></div>` : ''}
+      ${state.folders.length ? state.folders.map(fd => `
+        <div class="folder-item ${String(state.folderId) === String(fd.id) ? 'selected' : ''}" data-fid="${fd.id}">
+          <input type="radio" name="folder" ${String(state.folderId) === String(fd.id) ? 'checked' : ''} data-fid="${fd.id}" />
+          <span>${escapeHtml(fd.title)}</span>
+          <span class="folder-count">${fd.media_count} 个内容 · ID:${fd.id}</span>
+        </div>`).join('') : ''}
+    </div>`;
+}
+
+// ---------- Step 4: 执行 ----------
+function renderStep4() {
+  const running = state.status === STATUS.RUNNING;
+  const pct = state.progress.total ? Math.round(state.progress.done / state.progress.total * 100) : 0;
+  return `
+    <div class="panel-card">
+      <div class="panel-title">${icons.play} 一键执行
+        <span style="margin-left:auto;font-size:12px;color:var(--text-muted)">间隔 ${state.interval/1000}s · 目标收藏夹 ID:${escapeHtml(String(state.folderId))} · 共 ${state.tasks.filter(t=>t.enabled!==false).length} 项</span>
+      </div>
+      <div class="interval-control" style="display:inline-flex;margin-bottom:12px">
+        ${icons.settings}<span>请求间隔:</span>
+        <select id="interval-select">
+          <option value="1500" ${state.interval===1500?'selected':''}>1.5s</option>
+          <option value="2000" ${state.interval===2000?'selected':''}>2.0s</option>
+          <option value="3000" ${state.interval===3000?'selected':''}>3.0s</option>
+          <option value="5000" ${state.interval===5000?'selected':''}>5.0s</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        ${running
+          ? '<button class="btn-primary" style="width:auto;padding:10px 22px;margin:0;background:var(--red)" id="btn-cancel">■ 停止</button>'
+          : '<button class="btn-primary" style="width:auto;padding:10px 22px;margin:0" id="btn-run">▶ 开始一键收藏</button>'}
+        <button class="btn-secondary" id="btn-back3">← 上一步</button>
+        <button class="btn-secondary" id="btn-toggle-script">${icons.terminal} 备用控制台脚本</button>
+      </div>
+      <div class="progress-outer"><div class="progress-inner" style="width:${pct}%"></div></div>
+      <div class="stat-row">
+        <span>进度 <b>${state.progress.done}/${state.progress.total}</b></span>
+        ${state.stats ? `<span>成功 <b style="color:var(--green)">${state.stats.done}</b></span><span>已存在 <b>${state.stats.exists + state.stats.skip}</b></span><span>被筛掉 <b style="color:var(--yellow)">${state.stats.filtered}</b></span><span>未找到 <b>${state.stats.notfound}</b></span><span>失败 <b style="color:var(--red)">${state.stats.fail}</b></span>` : ''}
+      </div>
+      <div class="run-log" id="run-log" style="margin-top:14px">${renderLogLines()}</div>
+    </div>
+    ${state.showScript ? renderScriptPanel() : ''}
   `;
+}
+
+function renderLogLines() {
+  return state.logs.map(l => `<div class="${l.type==='ok'?'ok':l.type==='err'?'err':l.type==='warn'?'warn':''}">[${l.t}] ${escapeHtml(l.msg)}</div>`).join('');
+}
+
+function currentFilters() {
+  const f = Object.assign({}, state.filters);
+  const out = {};
+  if (f.minPlay > 0) out.minPlay = f.minPlay;
+  if (f.minFav > 0) out.minFav = f.minFav;
+  if (f.minLike > 0) out.minLike = f.minLike;
+  if (f.maxDuration > 0) out.maxDuration = f.maxDuration;
+  if (String(f.upMatch).trim()) out.upMatch = String(f.upMatch).trim();
+  if (f.strict) out.strict = 1;
+  if (f.preferShort) out.preferShort = 1;
+  if (f.upPrefix) out.upPrefix = 1;
+  out.searchPages = f.searchPages; out.detailCount = f.detailCount;
+  out.wPlay = f.wPlay; out.wFav = f.wFav; out.wLike = f.wLike;
+  return state.filtersEnabled ? out : {};
 }
 
 function renderScriptPanel() {
-  const script = generateBilibiliScript(state.songs, state.interval);
+  const script = generateBilibiliScript(state.tasks, { interval: state.interval, filters: currentFilters(), dedupe: state.dedupe });
   return `
     <div class="script-box">
       <div class="script-box-header">
-        <div class="script-box-header-left">
-          <div class="dot-green"></div>
-          Automation Script (JS)
-        </div>
-        <div class="script-controls">
-          <div class="interval-control">
-            ${icons.settings}
-            <span>间隔:</span>
-            <select id="interval-select">
-              <option value="2000" ${state.interval === 2000 ? 'selected' : ''}>2.0s</option>
-              <option value="3000" ${state.interval === 3000 ? 'selected' : ''}>3.0s</option>
-              <option value="5000" ${state.interval === 5000 ? 'selected' : ''}>5.0s</option>
-            </select>
-          </div>
-        </div>
+        <div class="script-box-header-left"><div class="dot-green"></div>Automation Script (JS)</div>
       </div>
       <div class="code-area">
         <div class="code-fade"></div>
@@ -777,160 +1481,342 @@ function renderScriptPanel() {
         <button class="btn-copy" id="btn-copy">${icons.copy} 复制代码</button>
       </div>
       <div class="steps-box">
-        <div class="steps-title">
-          ${icons.externalLink}
-          使用步骤
-        </div>
+        <div class="steps-title">${icons.externalLink} 何时使用？</div>
         <ol class="steps-list">
-          <li><span class="step-num">1</span> 复制上方代码。</li>
-          <li><span class="step-num">2</span> 打开 <a href="https://www.bilibili.com" target="_blank">Bilibili</a> 并登录账号。</li>
-          <li><span class="step-num">3</span> 按 <kbd>F12</kbd> 打开控制台 (Console)。</li>
-          <li><span class="step-num">4</span> 粘贴代码并回车运行。</li>
+          <li><span class="step-num">1</span> 内置模式受浏览器 CORS/风控限制、或私密歌单读取失败时使用。</li>
+          <li><span class="step-num">2</span> 复制上方代码，打开 <a href="https://www.bilibili.com" target="_blank">Bilibili</a> 并登录。</li>
+          <li><span class="step-num">3</span> 按 <kbd>F12</kbd> 打开控制台，粘贴回车运行（任务与筛选条件已内嵌）。</li>
         </ol>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-function renderEmptyScript() {
-  return `
-    <div class="empty-state">
-      ${icons.terminal}
-      <h3>生成自动化脚本</h3>
-      <p>上传歌单并确认歌曲后，点击「生成全自动脚本」</p>
-    </div>
-  `;
+function renderError() {
+  return `<div class="alert-error" style="margin-top:14px">${icons.alertTriangle}<span>${escapeHtml(state.errorMsg)}</span></div>`;
 }
 
 // ============================================================
-// Event Binding
+// Events & Actions
 // ============================================================
+let qrTimer = null;
+
 function bindEvents() {
-  // Upload zone click
-  const uploadZone = $('#upload-zone');
-  const fileInput = $('#file-input');
-  if (uploadZone && fileInput) {
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileUpload);
+  // step chips navigation (only backwards to completed steps)
+  document.querySelectorAll('.step-chip').forEach((chip, idx) => {
+    chip.style.cursor = (idx + 1 < state.step && state.tasks.length) ? 'pointer' : 'default';
+    chip.onclick = () => { if (idx + 1 < state.step && state.tasks.length) { state.step = idx + 1; render(); } };
+  });
+
+  // Step 1
+  document.querySelectorAll('[data-mode]').forEach(el => el.onclick = () => { state.mode = el.dataset.mode; state.status = STATUS.IDLE; render(); });
+  const urlIn = $('#url-input');
+  if (urlIn) {
+    urlIn.oninput = e => state.urlInput = e.target.value;
+    urlIn.onkeydown = e => { if (e.key === 'Enter') doFetchUrl(); };
   }
+  const bf = $('#btn-fetch'); if (bf) bf.onclick = doFetchUrl;
+  const txtIn = $('#txt-input'); if (txtIn) txtIn.oninput = e => state.rawText = e.target.value;
+  const bu = $('#btn-upload'); if (bu) bu.onclick = () => $('#file-input').click();
+  const fi = $('#file-input'); if (fi) fi.onchange = handleFileUpload;
+  const bp = $('#btn-parse-txt'); if (bp) bp.onclick = doParseTxt;
+  const bn2 = $('#btn-next2'); if (bn2) bn2.onclick = () => { state.step = 2; render(); };
 
-  // Clear button
-  const btnClear = $('#btn-clear');
-  if (btnClear) btnClear.addEventListener('click', () => {
-    state.songs = [];
-    state.showScript = false;
-    state.status = STATUS.IDLE;
-    render();
+  // Step 2 filters
+  const fw = (id, key, num) => { const el = $(id); if (el) el.oninput = e => { state.filters[key] = num ? Math.max(0, parseInt(e.target.value) || 0) : e.target.value; }; };
+  fw('#f-minplay', 'minPlay', true); fw('#f-minfav', 'minFav', true); fw('#f-minlike', 'minLike', true);
+  fw('#f-maxdur', 'maxDuration', true); fw('#f-upmatch', 'upMatch', false);
+  const fe = $('#f-enabled'); if (fe) fe.onchange = e => { state.filtersEnabled = e.target.checked; render(); };
+  const fp = $('#f-pages'); if (fp) fp.onchange = e => state.filters.searchPages = parseInt(e.target.value);
+  const fd = $('#f-detail'); if (fd) fd.onchange = e => state.filters.detailCount = parseInt(e.target.value);
+  const fs = $('#f-strict'); if (fs) fs.onchange = e => state.filters.strict = e.target.value === '1';
+  const fsh = $('#f-short'); if (fsh) fsh.onchange = e => state.filters.preferShort = e.target.checked;
+  const fpr = $('#f-prefix'); if (fpr) fpr.onchange = e => state.filters.upPrefix = e.target.checked;
+  document.querySelectorAll('.task-enable').forEach(el => el.onchange = e => state.tasks[+e.target.dataset.i].enabled = e.target.checked);
+  document.querySelectorAll('.task-term').forEach(el => {
+    el.oninput = e => state.tasks[+e.target.dataset.i].term = e.target.value;
+    el.onchange = e => { const t = state.tasks[+e.target.dataset.i]; if (t.exact && e.target.value !== t.term) { /* edited: drop exact lock */ } };
   });
+  document.querySelectorAll('.btn-remove').forEach(el => el.onclick = e => { state.tasks.splice(+e.currentTarget.dataset.i, 1); render(); });
+  const bb1 = $('#btn-back1'); if (bb1) bb1.onclick = () => { state.step = 1; render(); };
+  const bn3 = $('#btn-next3'); if (bn3) bn3.onclick = async () => {
+    state.step = 3; render();
+    if (state.user) loadFolders();
+    if (!state.user && state.loginTab === 'qr' && !state.login.qrUrl) doQrRefresh();
+  };
 
-  // Song input change
-  document.querySelectorAll('.song-input').forEach(el => {
-    el.addEventListener('change', (e) => {
-      const idx = parseInt(e.target.dataset.index);
-      state.songs[idx] = e.target.value;
-    });
+  // Step 3 login tabs
+  document.querySelectorAll('[data-lt]').forEach(el => el.onclick = () => {
+    state.loginTab = el.dataset.lt; state.login.note = ''; state.login.noteOk = state.login.noteErr = false;
+    stopQrPolling(); render();
+    if (state.loginTab === 'qr' && !state.login.qrUrl) doQrRefresh();
   });
+  const bqr = $('#btn-qr-refresh'); if (bqr) bqr.onclick = doQrRefresh;
+  const bcl = $('#btn-check-login'); if (bcl) bcl.onclick = doCheckLogin;
+  const bsms = $('#btn-sms-send'); if (bsms) bsms.onclick = doSmsSend;
+  const bmsms = $('#btn-sms-login'); if (bmsms) bmsms.onclick = doSmsLogin;
+  const bpwd = $('#btn-pwd-login'); if (bpwd) bpwd.onclick = doPwdLogin;
+  const bck = $('#btn-ck-save'); if (bck) bck.onclick = doCookieSave;
+  const blo = $('#btn-logout'); if (blo) blo.onclick = doLogout;
+  const blf = $('#btn-load-folders'); if (blf) blf.onclick = loadFolders;
+  document.querySelectorAll('.folder-item').forEach(el => el.onclick = () => { state.folderId = el.dataset.fid; render(); });
+  const bb2 = $('#btn-back2'); if (bb2) bb2.onclick = () => { state.step = 2; render(); };
+  const bn4 = $('#btn-next4'); if (bn4) bn4.onclick = () => { state.step = 4; render(); };
 
-  // Song remove
-  document.querySelectorAll('.btn-remove').forEach(el => {
-    el.addEventListener('click', (e) => {
-      const idx = parseInt(e.target.dataset.index);
-      state.songs.splice(idx, 1);
-      if (state.songs.length === 0) {
-        state.showScript = false;
-        state.status = STATUS.IDLE;
-      }
-      render();
-    });
-  });
-
-  // Generate button
-  const btnGen = $('#btn-generate');
-  if (btnGen) btnGen.addEventListener('click', () => {
-    state.showScript = true;
-    render();
-  });
-
-  // Interval select
-  const intervalSelect = $('#interval-select');
-  if (intervalSelect) {
-    intervalSelect.addEventListener('change', (e) => {
-      state.interval = parseInt(e.target.value);
-      render();
-    });
-  }
-
-  // Copy button
-  const btnCopy = $('#btn-copy');
-  if (btnCopy) {
-    btnCopy.addEventListener('click', async () => {
-      const script = generateBilibiliScript(state.songs, state.interval);
-      try {
-        await navigator.clipboard.writeText(script);
-        btnCopy.classList.add('copied');
-        btnCopy.innerHTML = '${icons.check} 已复制!';
-        setTimeout(() => {
-          btnCopy.classList.remove('copied');
-          btnCopy.innerHTML = '${icons.copy} 复制代码';
-        }, 2000);
-      } catch {
-        alert('复制失败，请手动选中代码复制。');
-      }
-    });
-  }
+  // Step 4
+  const iv = $('#interval-select'); if (iv) iv.onchange = e => { state.interval = parseInt(e.target.value); render(); };
+  const brun = $('#btn-run'); if (brun) brun.onclick = startRun;
+  const bcancel = $('#btn-cancel'); if (bcancel) bcancel.onclick = () => { state.cancelled = true; };
+  const bb3 = $('#btn-back3'); if (bb3) bb3.onclick = () => { if (state.status !== STATUS.RUNNING) { state.step = 3; render(); } };
+  const bts = $('#btn-toggle-script'); if (bts) bts.onclick = () => { state.showScript = !state.showScript; render(); };
+  const bcp = $('#btn-copy'); if (bcp) bcp.onclick = copyScript;
 }
 
-// ============================================================
-// File Upload Handler
-// ============================================================
-async function handleFileUpload(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const text = await file.text();
-  state.rawText = text;
-
-  state.status = STATUS.PARSING;
-  state.showScript = false;
-  state.errorMsg = '';
-  render();
-
-  // Simulate a small delay for UX
-  await new Promise(r => setTimeout(r, 400));
-
+// ---------- Step 1 actions ----------
+async function doFetchUrl() {
+  const input = ($('#url-input') ? $('#url-input').value : state.urlInput).trim();
+  if (!input) { state.errorMsg = '请先粘贴歌单链接'; state.status = STATUS.ERROR; render(); return; }
+  state.urlInput = input;
+  state.status = STATUS.FETCHING; state.errorMsg = ''; render();
   try {
-    const parsed = parsePlaylist(text);
-    if (parsed.length === 0) {
-      throw new Error('未能识别出有效歌曲，请检查文件格式。');
-    }
-    state.songs = parsed;
+    const pl = await fetchPlaylistFromUrl(input);
+    state.sourceName = pl.name || (pl.sourceType === 'favfolder' ? '收藏夹' + pl.id : '歌单' + pl.id);
+    state.tasks = pl.items.map(it => ({ term: it.title, author: it.author, exact: { bvid: it.bvid, aid: it.aid }, enabled: true }));
     state.status = STATUS.SUCCESS;
-  } catch (err) {
+  } catch (e) {
     state.status = STATUS.ERROR;
-    state.errorMsg = err.message || '解析失败';
+    state.errorMsg = '识别失败：' + e.message;
   }
   render();
 }
 
-// ============================================================
-// Utilities
-// ============================================================
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function doParseTxt() {
+  const text = ($('#txt-input') ? $('#txt-input').value : state.rawText).trim();
+  if (!text) { state.errorMsg = '请输入或上传歌单文本'; state.status = STATUS.ERROR; render(); return; }
+  state.rawText = text;
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const tasks = [];
+  for (const line of lines) {
+    const cleaned = cleanSongLine(line);
+    if (!cleaned || isSeparatorLine(line)) continue;
+    let term = cleaned, author = '';
+    const sepIdx = findSep(cleaned);
+    if (sepIdx > 0) { term = cleaned.slice(0, sepIdx).trim(); author = cleaned.slice(sepIdx + 1).trim().replace(/^[-–—]\s*/, '').trim(); }
+    if (term) tasks.push({ term: term, author: author, exact: null, enabled: true });
+  }
+  if (!tasks.length) { state.errorMsg = '未解析到有效歌曲行'; state.status = STATUS.ERROR; render(); return; }
+  state.sourceName = 'TXT导入';
+  state.tasks = tasks; state.status = STATUS.SUCCESS;
+  render();
+}
+
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { state.rawText = String(ev.target.result); state.status = STATUS.IDLE; render(); doParseTxt(); };
+  reader.readAsText(file);
+}
+
+// ---------- Step 3 login actions ----------
+async function doQrRefresh() {
+  try {
+    stopQrPolling();
+    const t = await qrNewTicket();
+    state.login.qrUrl = t.url; state.login.qrcode_key = t.qrcode_key;
+    state.login.qrStatus = ''; state.login.note = '二维码已生成，请用哔哩哔哩App扫码（约180秒有效）';
+    state.login.noteOk = false; state.login.noteErr = false;
+    render();
+    startQrPolling();
+  } catch (e) {
+    state.login.qrStatus = 'err'; state.login.note = '获取二维码失败：' + e.message; state.login.noteErr = true;
+    render();
+  }
+}
+
+function startQrPolling() {
+  stopQrPolling();
+  qrTimer = setInterval(async () => {
+    if (!state.login.qrcode_key) return;
+    try {
+      const r = await qrPoll(state.login.qrcode_key);
+      if (r.code === 0) { // 确认成功
+        stopQrPolling();
+        state.login.qrStatus = 'ok'; state.login.note = '✅ 手机已确认！正在同步登录状态...';
+        const ok = await doCheckLogin(true);
+        if (!ok) { state.login.note = '已确认但无法读取登录态：本页不在 bilibili.com 域下时 Cookie 无法写入，请改用「Cookie 注入」。'; state.login.noteErr = true; render(); }
+      } else if (r.code === 86038) {
+        stopQrPolling();
+        state.login.qrStatus = 'expired'; state.login.note = '二维码已过期，请点击刷新';
+        render();
+      } else if (r.code === 86039) {
+        if (state.login.qrStatus !== 'scanned') { state.login.qrStatus = 'scanned'; state.login.note = '已扫码，请在手机上点击确认'; render(); }
+      } else if (r.code === 86090) {
+        state.login.qrStatus = 'scanned'; // 重复扫码
+      } else {
+        state.login.qrStatus = 'err'; state.login.note = '轮询异常 code=' + r.code + ': ' + (r.message || '');
+      }
+    } catch (e) { /* 网络抖动忽略，下次继续 */ }
+  }, 2500);
+}
+
+function stopQrPolling() { if (qrTimer) { clearInterval(qrTimer); qrTimer = null; } }
+
+async function doCheckLogin(silentFail) {
+  try {
+    restoreCookie();
+    const ok = await checkLogin();
+    if (ok) {
+      saveCookie({ sessdata: biGetCookie('SESSDATA'), jct: biGetCookie('bili_jct'), uid: state.user.mid, name: state.user.name });
+      state.login.note = '✅ 已登录：' + state.user.name; state.login.noteOk = true;
+      addLog('登录成功：' + state.user.name + ' (UID ' + state.user.mid + ')', 'ok');
+      render(); loadFolders();
+    } else if (!silentFail) {
+      state.login.note = '尚未检测到登录状态。若已在官方页/App完成登录，请用「Cookie 注入」同步凭证。';
+      state.login.noteErr = true; render();
+    }
+    return ok;
+  } catch (e) {
+    if (!silentFail) { state.login.note = '检查登录失败：' + e.message; state.login.noteErr = true; render(); }
+    return false;
+  }
+}
+
+async function doSmsSend() {
+  const tel = ($('#sms-tel') ? $('#sms-tel').value : '').trim();
+  if (!/^1\d{10}$/.test(tel)) { smsNote('请输入正确的11位大陆手机号', true); return; }
+  try {
+    const d = await smsSend('', tel);
+    state.login.smsToken = d.token || ''; state.login.smsCID = d.cid || '86'; state.login.smsRefresh = d.refresh_token || '';
+    smsNote(d.url ? '需要先通过人机验证，已打开验证页，完成后再次点击发送' : '验证码已发送至 ' + tel.slice(0, 3) + '****' + tel.slice(-4));
+    if (d.url) window.open(d.url, '_blank');
+  } catch (e) {
+    smsNote('发送失败：' + e.message + '（风控拦截时可先在B站官方页用短信登录，再回本页用 Cookie 注入）', true);
+    window.open('https://account.bilibili.com/h5/mobile-login', '_blank');
+  }
+}
+
+async function doSmsLogin() {
+  const code = ($('#sms-code') ? $('#sms-code').value : '').trim();
+  const tel = ($('#sms-tel') ? $('#sms-tel').value : '').trim();
+  if (!code) { smsNote('请输入短信验证码', true); return; }
+  try {
+    await smsConfirm({ code: code, cid: state.login.smsCID || '86', tel: tel, token: state.login.smsToken, refresh_token: state.login.smsRefresh });
+    smsNote('✅ 短信登录接口成功，正在同步状态...');
+    await doCheckLogin();
+  } catch (e) { smsNote('登录失败：' + e.message, true); }
+}
+
+function smsNote(msg, isErr) {
+  state.login.note = msg; state.login.noteOk = !isErr; state.login.noteErr = !!isErr;
+  const el = $('.login-status'); if (el) { el.textContent = msg; el.className = 'login-status ' + (isErr ? 'err' : 'ok'); }
+}
+
+async function doPwdLogin() {
+  const u = ($('#pwd-user') ? $('#pwd-user').value : '').trim();
+  const p = ($('#pwd-pass') ? $('#pwd-pass').value : '');
+  if (!u || !p) { smsNote('请输入账号和密码', true); return; }
+  try {
+    const r = await pwdLogin(u, p, null);
+    if (r.code === 0) { smsNote('✅ 账密登录接口成功，正在同步状态...'); await doCheckLogin(); }
+    else if (r.data && r.data.url) { smsNote('需要人机验证，已打开官方验证页；完成后点「检查登录」或用 Cookie 注入'); window.open(r.data.url, '_blank'); }
+    else { smsNote('登录失败(' + r.code + ')：' + (r.message || '被风控/极验拦截') + ' — Web端账密登录需过极验，建议改用扫码或Cookie方式', true); }
+  } catch (e) { smsNote('登录异常：' + e.message, true); }
+}
+
+async function doCookieSave() {
+  const raw = ($('#ck-input') ? $('#ck-input').value : '').trim();
+  if (!raw) { smsNote('请粘贴 Cookie 内容', true); return; }
+  let sessdata = '', jct = '', uid = '';
+  const mS = raw.match(/SESSDATA=([^;\s]+)/), mJ = raw.match(/bili_jct=([^;\s]+)/), mU = raw.match(/DedeUserID=(\d+)/);
+  if (mS) sessdata = mS[1]; else if (/^[A-Za-z0-9*_%\-\.]+$/.test(raw)) sessdata = raw; // 直接粘贴值
+  if (mJ) jct = mJ[1];
+  if (mU) uid = mU[1];
+  if (!sessdata) { smsNote('未找到 SESSDATA，请检查粘贴内容', true); return; }
+  document.cookie = 'SESSDATA=' + encodeURIComponent(sessdata) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+  if (jct) document.cookie = 'bili_jct=' + encodeURIComponent(jct) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+  if (uid) document.cookie = 'DedeUserID=' + encodeURIComponent(uid) + '; path=/; domain=.bilibili.com; secure; samesite=lax';
+  try {
+    const ok = await checkLogin();
+    if (ok) {
+      saveCookie({ sessdata: sessdata, jct: biGetCookie('bili_jct') || jct, uid: state.user.mid, name: state.user.name });
+      smsNote('✅ Cookie 有效，已登录：' + state.user.name);
+      addLog('Cookie 登录成功：' + state.user.name, 'ok');
+      render(); loadFolders();
+    } else { smsNote('该 Cookie 未处于登录状态或已失效', true); }
+  } catch (e) { smsNote('验证失败：' + e.message, true); }
+}
+
+function doLogout() {
+  localStorage.removeItem('bp_cookie');
+  ['SESSDATA', 'bili_jct', 'DedeUserID'].forEach(k => { document.cookie = k + '=; path=/; domain=.bilibili.com; expires=Thu, 01 Jan 1970 00:00:00 GMT'; document.cookie = k + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; });
+  state.user = null; state.folders = []; state.folderId = '';
+  BI_KEYS = null;
+  render();
+}
+
+async function loadFolders() {
+  if (!state.user) return;
+  state.foldersLoading = true; state.folderErr = ''; render();
+  try {
+    state.folders = await fetchFolders(state.user.mid);
+    if (!state.folders.length) state.folderErr = '没有创建任何收藏夹，请先在 B 站创建一个';
+  } catch (e) {
+    state.folderErr = '加载收藏夹失败：' + e.message;
+  }
+  state.foldersLoading = false;
+  render();
+}
+
+// ---------- Step 4 run ----------
+async function startRun() {
+  if (!state.user) { alert('请先完成登录'); return; }
+  if (!state.folderId) { alert('请选择目标收藏夹'); return; }
+  const enabled = state.tasks.filter(t => t.enabled !== false && t.term.trim());
+  if (!enabled.length) { alert('没有可执行的任务'); return; }
+  state.status = STATUS.RUNNING; state.cancelled = false;
+  state.progress = { done: 0, total: enabled.length }; state.stats = null;
+  state.logs = [];
+  render();
+  addLog('开始一键收藏：' + enabled.length + ' 项 → 收藏夹ID ' + state.folderId + (state.filtersEnabled ? '（筛选已启用）' : '（筛选关闭）'));
+  const cfg = {
+    filters: currentFilters(), filtersEnabled: state.filtersEnabled,
+    folderId: state.folderId, interval: state.interval, dedupe: state.dedupe,
+  };
+  try {
+    await biEnsureKeys();
+  } catch (e) { addLog('WBI 密钥初始化失败：' + e.message, 'err'); }
+  const stats = await executeTasks(
+    state.tasks, cfg,
+    (msg, type) => addLog(msg, type === 'ok' ? 'ok' : type === 'err' ? 'err' : type === 'debug' ? 'info' : type || 'info'),
+    (done, total) => { state.progress = { done: done, total: total }; const bar = $('.progress-inner'); const sr = $('.stat-row'); if (bar) bar.style.width = Math.round(done / total * 100) + '%'; if (sr) { const b = sr.querySelector('b'); if (b) b.textContent = done + '/' + total; } },
+    () => state.cancelled
+  );
+  state.stats = stats;
+  state.status = STATUS.DONE;
+  render();
+}
+
+function copyScript() {
+  const script = generateBilibiliScript(state.tasks, { interval: state.interval, filters: currentFilters(), dedupe: state.dedupe });
+  navigator.clipboard.writeText(script).then(() => {
+    const btn = $('#btn-copy');
+    if (btn) { btn.innerHTML = icons.check + ' 已复制!'; btn.classList.add('copied'); setTimeout(() => { btn.innerHTML = icons.copy + ' 复制代码'; btn.classList.remove('copied'); }, 2000); }
+  }).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = script; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) { } ta.remove();
+  });
 }
 
 // ============================================================
 // Init
 // ============================================================
-render();
+document.addEventListener('DOMContentLoaded', () => {
+  appEl = $('#app');
+  restoreCookie();
+  render();
+  checkLogin().then(ok => { if (ok) { saveCookie({ sessdata: biGetCookie('SESSDATA'), jct: biGetCookie('bili_jct'), uid: state.user.mid, name: state.user.name }); render(); if (state.step === 3) loadFolders(); } });
+});
 
-// Hide loading screen
-const loader = document.getElementById('loading-screen');
-if (loader) loader.style.display = 'none';
-
-console.log('BiliPlaylist loaded successfully (zero external deps)');
 </script>
 </body>
 </html>
